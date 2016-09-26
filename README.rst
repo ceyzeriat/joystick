@@ -14,16 +14,14 @@
 :Version: 0.1
 
 Joystick provides a light-weight and simple framework to real-time plotting and logging data while the console remains accessible to control the on-going simulation and/or data acquisition.
+
 In short, this framework can replace a Graphical User Interface (GUI) on many projects, as long as 1) the user is confortable enough with console command-line controlling, and 2) the real-time data is not too complex to display).
 
 Allright - let's talk clearly. You have some data-stream (serial port, web scraping, on-going simulation, etc), and you would like to plot in real-time whatever is happening on this stream, and not only that, you would also like to send commands to the thread producing or gathering the data without having to build a full GUI-control.
 
 This package is specifically designed for you.
 
-Joystick is based on Tkinter to display frames of text or graph.
-
-
-It is released under the GNU General Public License v3 or later (GPLv3+).
+Joystick is based on Tkinter to display frames of text or graph, and it is released under the GNU General Public License v3 or later (GPLv3+).
 
 .. code-block:: python
 
