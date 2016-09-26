@@ -37,8 +37,6 @@ setup(
     install_requires = [],
     download_url = 'https://github.com/ceyzeriat/joystick/tree/master/dist',
     keywords = ['realtime', 'real', 'time', 'live', 'stream', 'figure', 'data', 'matplotlib', 'control', 'thread', 'serial', 'plot'],
-    package_data={"": ["README.rst", "LICENSE", "HISTORY.rst"]},
-    include_package_data=True,
     classifiers = [
         "Development Status :: 4 - Beta",
         "Environment :: Console",

@@ -1,5 +1,4 @@
 .. joystick
-===========
 
 .. image:: http://img.shields.io/travis/ceyzeriat/joystick/master.svg?style=flat
     :target: https://travis-ci.org/ceyzeriat/joystick
@@ -13,18 +12,18 @@
 :Author: Guillaume Schworer
 :Version: 0.1
 
-Joystick provides a light-weight and simple framework to real-time plotting and logging data while the console remains accessible to control the on-going simulation and/or data acquisition.
+Joystick provides a light-weight and simple framework to real-time data-plotting and logging, while the console remains accessible to manage the on-going simulation and data acquisition.
 
-In short, this framework can replace a Graphical User Interface (GUI) on many projects, as long as 1) the user is confortable enough with console command-line controlling, and 2) the real-time data is not too complex to display.
+In some ways, this framework can replace a Graphical User Interface (GUI) on many projects, as long as 1) the user is confortable enough with managing the simulation using command-lines, and 2) the display of the real-time data is not too complex.
 
-Allright - let's talk clearly. You have some data-stream (serial port, web scraping, on-going simulation, etc), and you would like to plot or log in real-time whatever is happening on this stream. Not only that, in additing you would also like to send commands to the thread producing or gathering the data to control the data-stream mechanisms... without having to build a GUI (which looks pretty to your boss, but is time-consumming both in initial design and maintenance).
+Allright. Let's say you have some data-stream (serial port, web scraping, on-going simulation or experiment, etc), and you would like to plot or log in real-time whatever is happening. In addition you would also like to send commands to interact with the mechanisms producing the data... without having to build a GUI (which looks pretty to your boss, but is time-consumming both in initial design and maintenance).
 
 Then, this package is for you.
 
 Note that Joystick is based on Tkinter to display frames of text or graph, and that it is released under the GNU General Public License v3 or later (GPLv3+).
 
 
-Straight to the point: check-out this example. It generates fake random data (ydata) between 0 and 1.05 every 0.2 second, which is displayed in a graph as a function of time. Whenever there is a datapoint above 1, it drops a warning in the text-frame.
+Straight to the point: check-out this example. It generates fake random data (ydata) between 0 and 1.05 every 0.2 second, displayed as a function of time in a graph-frame. Whenever there is a datapoint above 1, it drops a warning in the text-frame.
 
 .. code-block:: python
 
@@ -33,37 +32,39 @@ Straight to the point: check-out this example. It generates fake random data (yd
     import time
 
     class test(jk.Joystick):
+       # initialize the infinite loop decorator
         _infinite_loop = jk.deco_infinite_loop()
 
         def _init(self, *args, **kwargs):
             """
             Function called at initialization, don't bother why for now
             """
-            self._t0 = time.time()  # initialize time axis
-            self.xdata = np.array([self._t0])  # time axis
-            self.ydata = np.array([0.0])  # fake data
-            # create a graph output
+            self._t0 = time.time()  # initialize time
+            self.xdata = np.array([self._t0])  # time x-axis
+            self.ydata = np.array([0.0])  # fake data y-axis
+            # create a graph frame
             self.mygraph = jk.Graph(daddy=self, name="test", size=(500, 500),
                                     pos=(50, 50), fmt="go-", xnpts=15,
-                                    freq_up=7, bgcol="y")
-            # create a text output
+                                    freq_up=7, bgcol="y", xylim=(0,10,0,1))
+            # create a text frame
             self.mytext = jk.Text(daddy=self, name="Y-overflow",
                                   size=(500, 250), pos=(600, 50), freq_up=1)
 
-        @_infinite_loop(wait_time=0.2)  # function looped every 0.2 second
-        def _generate_fake_data(self):
+        @_infinite_loop(wait_time=0.2)
+        def _generate_fake_data(self):  # function looped every 0.2 second
             """
-            Function called at simulation start, getting data and
+            Loop starting with simulation start, getting data and
             pushing it to the graph every 0.2 seconds
             """
-            # concatenate data on the time axis
+            # concatenate data on the time x-axis
             self.xdata = jk.core.add_datapoint(self.xdata,
                                                time.time())
-            # concatenate data on the fake data axis
+            # concatenate data on the fake data y-axis
             self.ydata = jk.core.add_datapoint(self.ydata,
                                                np.random.random()*1.05)
-            # overflow warning for the last data point
+            # check overflow for the last data point added
             if self.ydata[-1] > 1:
+                # send warning to the text-frame
                 self.mytext.add_text('Some data bumped into the ceiling: '
                                      '{:.3f}'.format(self.ydata[-1]))
             # prepare the time axis
@@ -74,7 +75,7 @@ Straight to the point: check-out this example. It generates fake random data (yd
     t = test()
     t.start()
 
-Now you should see a 'snake' going through the frame, but after 10 seconds, it is gone. Type (line by line):
+Now you should see a 'snake' going through the graph-frame, but after 10 seconds it is gone. Type (line by line):
 
 .. code-block:: python
 
@@ -82,7 +83,12 @@ Now you should see a 'snake' going through the frame, but after 10 seconds, it i
     t.mygraph.xnpts = 50
     t.mygraph.freq_up = 2
 
-Now that should be better, displaying the latest 50 points, at a slower pace (twice a second). Let's stop and reinitialize the graph:
+Now that should be better, displaying the latest 50 points at a slower pace (twice a second), and the x-axis is auto-adjusting. Here is what it should look like:
+
+.. image:: https://raw.githubusercontent.com/ceyzeriat/joystick/master/docs/img/view.png
+   :align: center
+
+Let's stop and reinitialize the graph with slightly different parameters:
 
 .. code-block:: python
 
@@ -90,12 +96,7 @@ Now that should be better, displaying the latest 50 points, at a slower pace (tw
     t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
     t.start()
     t.stop()
-
-Here is what it should look like:
-
-.. image:: https://raw.githubusercontent.com/ceyzeriat/joystick/master/docs/img/view.png
-   :align: center
-
+    t.exit()
 
 Documentation
 =============

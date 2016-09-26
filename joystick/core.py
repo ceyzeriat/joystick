@@ -42,7 +42,6 @@ PREUPDATEMETHOD = "_pre_update"
 # la méthode de mise à jour de la GUI
 UPDATEGUIMETHOD = "show"
 # nombre de pts gardés en mémoire en X
-XNPTSMAX = 50
 
 
 MATKWARGS = [item[4:] \
@@ -80,8 +79,11 @@ def callit(self, methodstr, *args, **kwargs):
         return getattr(self, methodstr)(*args, **kwargs)
 
 
-def add_datapoint(ar, ar2):
-        return np.r_[ar[-XNPTSMAX+np.size(ar2):], ar2]
+def add_datapoint(ar, ar2, xnptsmax=None):
+    if xnptsmax is None:
+        return np.r_[ar, ar2]
+    else:
+        return np.r_[ar[-int(xnptsmax)+np.size(ar2):], ar2]
 
 
 def timestamp():

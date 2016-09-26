@@ -38,7 +38,7 @@ class Graph(Frame):
     def __init__(self, daddy, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, xnpts=core.XNPTSMAX, fmt="ro-",
                  bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
-                 xylim=(0., None, 0., None), **kwargs):
+                 xylim=(0., None, 0., None), xnptsmax=50, **kwargs):
         """
         Initialization
         """
@@ -54,6 +54,7 @@ class Graph(Frame):
         kwargs['axrect'] = axrect
         kwargs['grid'] = grid
         kwargs['xylim'] = xylim
+        kwargs['xnptsmax'] = xnptsmax
         self._minmini = 1e-2
         self._kwargs = kwargs
         # call mummy init
@@ -62,6 +63,7 @@ class Graph(Frame):
         self._init_base(**self._kwargs)
 
     def _init_base(self, **kwargs):
+        self.xnptsmax = int(kwargs.pop('xnptsmax'))
         self.xylim = tuple(kwargs.pop('xylim')[:4])
         self.xnpts = int(kwargs.pop('xnpts'))
         axrect = tuple(kwargs.pop('axrect')[:4])
@@ -106,14 +108,26 @@ class Graph(Frame):
             self._canvas.draw()
 
     @property
+    def xnptsmax(self):
+        return self._xnptsmax
+
+    @xnptsmax.setter
+    def xnptsmax(self, value):
+        if value < 1:
+            print("{}Invalid value. Must be > 1{}" \
+            .format(core.font.red, core.font.normal))
+            return
+        self._xnptsmax = int(value)
+    
+    @property
     def xnpts(self):
         return self._xnpts
 
     @xnpts.setter
     def xnpts(self, value):
-        if not 1 < value <= core.XNPTSMAX:
+        if not 1 < value <= self.xnptsmax:
             print("{}Invalid value. Must be 1--{}{}" \
-            .format(core.font.red, core.XNPTSMAX, core.font.normal))
+            .format(core.font.red, self.xnptsmax, core.font.normal))
             return
         self._xnpts = int(value)
 
