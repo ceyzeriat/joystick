@@ -25,7 +25,7 @@
 ###############################################################################
 
 from . import core
-Tkinter = core.Tkinter
+tkinter = core.tkinter
 time = core.time
 from .frame import Frame
 
@@ -71,16 +71,16 @@ class Text(Frame):
         self._rev = bool(kwargs.pop('rev'))
         self._mark_line = bool(kwargs.pop('mark_line'))
         self._mark_fmt = kwargs.pop('mark_fmt')
-        self._text = Tkinter.Text(master=self._window, **core.tkkwargs(kwargs))
+        self._text = tkinter.Text(master=self._window, **core.tkkwargs(kwargs))
         self._text.config(font=kwargs.pop('font'),
                           undo=kwargs.pop('undo', True),
                           wrap=kwargs.pop('wrap', 'word'))
         if kwargs.pop('scrollbar'):
-            scrollbar = Tkinter.Scrollbar(self._text)
-            scrollbar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+            scrollbar = tkinter.Scrollbar(self._text)
+            scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
             self._text.config(yscrollcommand=scrollbar.set)
             scrollbar.config(command=self._text.yview)
-        self._text.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=True)            
+        self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)            
         # call the user's init if existing
         core.callit(self, core.INITMETHOD, **kwargs)
 
@@ -125,7 +125,7 @@ class Text(Frame):
         nl_e = "\n" if not in_the_end and not self._isempty and newline else ""
         #self._text._lines_to_
         self._lines_to_insert.append([
-            Tkinter.END if in_the_end else '1.0',
+            tkinter.END if in_the_end else '1.0',
             "{}{}{}{}".format(nl_f,
                                             addon if mark_line else "",
                                             txt,
@@ -133,5 +133,5 @@ class Text(Frame):
 
     def clear(self):
         if self.visible:
-            self._text.delete('1.0',Tkinter.END)
+            self._text.delete('1.0',tkinter.END)
         self._isempty = True

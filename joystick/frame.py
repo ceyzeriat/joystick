@@ -25,7 +25,7 @@
 ###############################################################################
 
 from . import core
-Tkinter = core.Tkinter
+tkinter = core.tkinter
 np = core.np
 
 
@@ -56,7 +56,7 @@ class Frame(object):
         self.freq_up = float(kwargs.pop('freq_up'))
         self._running = True and not self._mummy_running
         self._visible = True
-        self._window = Tkinter.Tk()
+        self._window = tkinter.Tk()
         self._window.title(str(kwargs.pop('name')))
         self._window.protocol("WM_DELETE_WINDOW", self.exit)
         pos = tuple(kwargs.pop('pos')[:2])
@@ -93,7 +93,7 @@ class Frame(object):
         """
         try:
             self.exit()
-        except Tkinter.TclError:  # already closed
+        except tkinter.TclError:  # already closed
             pass
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)

@@ -25,7 +25,7 @@
 ###############################################################################
 
 from . import core
-Tkinter = core.Tkinter
+tkinter = core.tkinter
 FigureCanvasTkAgg = core.mat.backends.backend_tkagg.FigureCanvasTkAgg
 np = core.np
 from .frame import Frame
@@ -36,7 +36,7 @@ __all__ = ['Graph']
 
 class Graph(Frame):
     def __init__(self, daddy, name, freq_up=1, pos=(50, 50), size=(400, 400),
-                 screen_relative=False, xnpts=core.XNPTSMAX, fmt="ro-",
+                 screen_relative=False, xnpts=30, fmt="ro-",
                  bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
                  xylim=(0., None, 0., None), xnptsmax=50, **kwargs):
         """
@@ -73,11 +73,11 @@ class Graph(Frame):
                                      **core.matkwargs(kwargs))
         self._canvas = FigureCanvasTkAgg(self._fig, master=self._window)
         self._canvas.show()
-        self._canvas.get_tk_widget().pack(side=Tkinter.TOP,
-                                          fill=Tkinter.BOTH,
+        self._canvas.get_tk_widget().pack(side=tkinter.TOP,
+                                          fill=tkinter.BOTH,
                                           expand=True)
-        self._canvas._tkcanvas.pack(side=Tkinter.TOP,
-                                    fill=Tkinter.BOTH,
+        self._canvas._tkcanvas.pack(side=tkinter.TOP,
+                                    fill=tkinter.BOTH,
                                     expand=True)
         self.ax.set_axis_bgcolor(kwargs.pop('bgcol'))
         grid = kwargs.pop('grid')

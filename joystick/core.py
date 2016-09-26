@@ -26,7 +26,12 @@
 
 import matplotlib as mat
 mat.use('TkAgg')
-import Tkinter
+from matplotlib import lines
+from matplotlib.backends import backend_tkagg
+try:
+    import Tkinter as tkinter
+except ImportError:
+    import tkinter
 import time
 import numpy as np
 

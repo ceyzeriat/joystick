@@ -18,8 +18,7 @@ install:
     - conda update -q conda
     - conda info -a
 
-    - conda create --yes -n test python=$PYTHON_VERSION matplotlib=$MATPLOTLIB_VERSION numpy astropy scipy setuptools nose
-    - pip install MCres patiencebar corner
+    - conda create --yes -n test python=$PYTHON_VERSION matplotlib numpy setuptools nose
     - source activate test
     - pip install coveralls
 
@@ -29,7 +28,7 @@ before_script: # configure a headless display to test plot generation
     - sleep 3 # give xvfb some time to start
 
 script:
-    - nosetests soif --with-coverage --cover-package=soif
+    - nosetests joystick --with-coverage --cover-package=joystick
 
 after_success:
     - coveralls
