@@ -77,7 +77,7 @@ def deco_infinite_loop(wait_time=0.5):
                 loopy.start()
             # at class-definition, this adds the function name in the
             # top-level decorator
-            core.append(infinite_loop_static, 'fcts', getattr(func, 'func_name', getattr(func, '__name__', None))
+            core.append(infinite_loop_static, 'fcts', getattr(func, 'func_name', getattr(func, '__name__', None)))
             return func_wrapper
         return func_decorator
     return infinite_loop_static
