@@ -86,7 +86,7 @@ Now that should be better, displaying the latest 50 points, at a slower pace (tw
 
 Here is what it should look like:
 
-.. image:: https://raw.githubusercontent.com/ceyzeriat/joystick/master/docs/img/view.jpg
+.. image:: https://raw.githubusercontent.com/ceyzeriat/joystick/master/docs/img/view.png
    :align: center
 
 
