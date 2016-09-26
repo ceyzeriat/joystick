@@ -1,0 +1,35 @@
+sudo: false
+
+env:
+    global:
+        - MATPLOTLIB_VERSION=1.5.1
+
+    matrix:
+        - PYTHON_VERSION=2.7
+        - PYTHON_VERSION=3.4
+        - PYTHON_VERSION=3.5
+
+install:
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda info -a
+
+    - conda create --yes -n test python=$PYTHON_VERSION matplotlib=$MATPLOTLIB_VERSION numpy astropy scipy setuptools nose
+    - pip install MCres patiencebar corner
+    - source activate test
+    - pip install coveralls
+
+before_script: # configure a headless display to test plot generation
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb some time to start
+
+script:
+    - nosetests soif --with-coverage --cover-package=soif
+
+after_success:
+    - coveralls

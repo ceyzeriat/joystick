@@ -1,0 +1,30 @@
+[run]
+source = {packagename}
+omit =
+   */test/*
+   */*/test/*
+   */*/*/test/*
+   */*version*
+   */*/*version*
+   */__init__.py
+   */*/__init__.py
+   */*/*/__init__.py
+   */*/core.py
+   */*/oiload.py
+   */*/oipriors.py
+   */*/oiexception.py
+
+[report]
+exclude_lines =
+   # Have to re-enable the standard pragma
+   pragma: no cover
+
+   # Don't complain about packages we have installed
+   except ImportError
+
+   # Don't complain if tests don't hit assertions
+   raise AssertionError
+   raise NotImplementedError
+
+   # Don't complain about script hooks
+   def main\(.*\):

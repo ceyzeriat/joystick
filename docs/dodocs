@@ -1,0 +1,44 @@
+#!/bin/bash
+# written by Guillaume Schworer, 2016
+
+echo ""
+
+old=$(ls ./*.rst | grep -v index.rst | wc -l)
+if [ "$old" -ne 0 ]; then
+    ls ./*.rst | grep -v index.rst | xargs rm
+    echo "Removed $old old docs (.rst) files"
+else
+    echo "No old docs files found."
+fi
+
+
+sphinx-apidoc -F -o ./ ../joystick/
+echo ""
+echo "Created new docs (.rst) files"
+
+make html
+make latexpdf
+echo ""
+echo "Compiled into pdf and html"
+
+cd ./_build/html/
+zip -r -0 html.zip *
+cd ../..
+echo ""
+echo "Created html tarball"
+
+mkdir -p ./old_docs
+mv ./JoystickHTML*.zip ./old_docs/
+mv ./Joystick*.pdf ./old_docs/
+echo ""
+echo "Moved old documentation to ./old_docs/"
+
+now="$(date +'%Y_%m_%dx%H_%M_%S')"
+mv ./_build/html/html.zip "./JoystickHTML_$now.zip"
+mv ./_build/latex/joystick.pdf "./Joystick_$now.pdf"
+echo ""
+echo "Copied latest documentation to root"
+
+echo ""
+echo "All done"
+echo ""

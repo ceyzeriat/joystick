@@ -1,0 +1,45 @@
+# Compiled files
+*.a
+*.o
+*.so
+__pycache__
+*.py[cod]
+
+# Ignore .c files by default to avoid including generated code. If you want to
+# add a non-generated .c extension, use `git add -f filename.c`.
+*.c
+
+# Other generated files
+htmlcov
+.coverage
+MANIFEST.in
+
+# Sphinx
+docs/_build
+docs/_templates
+docs/_static
+docs/old_docs
+
+# Packages/installer info
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+
+# Other
+.cache
+.tox
+.*.sw[op]
+*~
+*~lock*
+*fuse_hidden*
+
+# Mac OSX
+.DS_Store
