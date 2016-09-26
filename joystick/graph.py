@@ -38,7 +38,7 @@ class Graph(Frame):
     def __init__(self, daddy, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, xnpts=core.XNPTSMAX, fmt="ro-",
                  bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
-                 xylim=(0., 10., 0., None), **kwargs):
+                 xylim=(0., None, 0., None), **kwargs):
         """
         Initialization
         """
@@ -54,6 +54,7 @@ class Graph(Frame):
         kwargs['axrect'] = axrect
         kwargs['grid'] = grid
         kwargs['xylim'] = xylim
+        self._minmini = 1e-2
         self._kwargs = kwargs
         # call mummy init
         super(Graph, self).__init__(**self._kwargs)
@@ -154,7 +155,7 @@ class Graph(Frame):
         # None means recalculate the bound
         xmin, xmax, ymin, ymax = self.xylim
         xmin = x.min() if xmin is None else xmin
-        xmax = max(x.max(), xmin+1) if xmax is None else xmax
+        xmax = max(x.max(), xmin+self._minmini) if xmax is None else xmax
         ymin = y.min() if ymin is None else ymin
-        ymax = max(y.max(), ymin+1) if ymax is None else ymax
+        ymax = max(y.max(), ymin+self._minmini) if ymax is None else ymax
         self.set_xylim((xmin, xmax, ymin, ymax))

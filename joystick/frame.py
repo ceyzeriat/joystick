@@ -57,12 +57,11 @@ class Frame(object):
         self._running = True and not self._mummy_running
         self._visible = True
         self._window = Tkinter.Tk()
-        screen_relative = bool(kwargs.pop('screen_relative'))
         self._window.title(str(kwargs.pop('name')))
         self._window.protocol("WM_DELETE_WINDOW", self.exit)
         pos = tuple(kwargs.pop('pos')[:2])
         size = tuple(kwargs.pop('size')[:2])
-        if screen_relative:
+        if bool(kwargs.pop('screen_relative')):
             w = self._window.winfo_screenwidth()
             h = self._window.winfo_screenheight()
             pos = np.round(np.array(pos) * (w, h)).astype(int)
