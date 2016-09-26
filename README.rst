@@ -39,29 +39,36 @@ Straight to the point: check-out this example. It generates fake random data (yd
             """
             Function called at initialization, don't bother why for now
             """
-            self._t0 = time.time()
-            self.xdata = np.array([self._t0])
-            self.ydata = np.array([0.0])
+            self._t0 = time.time()  # initialize time axis
+            self.xdata = np.array([self._t0])  # time axis
+            self.ydata = np.array([0.0])  # fake data
+            # create a graph output
             self.mygraph = jk.Graph(daddy=self, name="test", size=(500, 500),
                                     pos=(50, 50), fmt="go-", xnpts=15,
                                     freq_up=7, bgcol="y")
+            # create a text output
             self.mytext = jk.Text(daddy=self, name="Y-overflow",
                                   size=(500, 250), pos=(600, 50), freq_up=1)
 
-        @_infinite_loop(wait_time=0.2)
+        @_infinite_loop(wait_time=0.2)  # function looped every 0.2 second
         def _generate_fake_data(self):
             """
             Function called at simulation start, getting data and
             pushing it to the graph every 0.2 seconds
             """
+            # concatenate data on the time axis
             self.xdata = jk.core.add_datapoint(self.xdata,
                                                time.time())
+            # concatenate data on the fake data axis
             self.ydata = jk.core.add_datapoint(self.ydata,
                                                np.random.random()*1.05)
+            # overflow warning for the last data point
             if self.ydata[-1] > 1:
                 self.mytext.add_text('Some data bumped into the ceiling: '
                                      '{:.3f}'.format(self.ydata[-1]))
+            # prepare the time axis
             t = np.round(self.xdata-self._t0, 1)
+            # push new data to the graph
             self.mygraph.set_xydata(t, self.ydata)
 
     t = test()
