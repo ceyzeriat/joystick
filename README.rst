@@ -80,7 +80,7 @@ Now that should be better, displaying the latest 50 points, at a slower pace (tw
 .. code-block:: python
 
     t.stop()
-    t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), fmt='ko:', xylim=(None, None, 0, 1))
+    t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
     t.start()
     t.stop()
 
@@ -99,7 +99,7 @@ Refer to this page, http://pythonhosted.org/joystick/joystick.html
 Requirements
 ============
 
-joystick requires the following Python packages:
+Joystick requires the following Python packages:
 
 * NumPy: for basic numerical routines
 * matplotlib: for plotting
@@ -147,4 +147,4 @@ If you use joystick on your project, please
 License
 =======
 
-joystick is released under the GNU General Public License v3 or later (GPLv3+). Please refer to the LICENSE file.
+Joystick is released under the GNU General Public License v3 or later (GPLv3+). Please refer to the LICENSE file.
