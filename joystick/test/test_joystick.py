@@ -57,7 +57,7 @@ class test(Joystick):
                          Text(name="Y-overflow",
                               size=(500, 250), pos=(600, 50), freq_up=1))
         self.myimg = self.add_frame(
-                      Image(name="IMG", size=(0.2, 0.2), pos=(0.2, 0.2),
+                      Image(name="IMG", size=(100, 100), pos=(50, 600),
                                screen_relative=False, axrect=(0,0,1,1), freq_up=3,
                                cm_bounds = (0, 1)))
 
@@ -91,8 +91,12 @@ class test(Joystick):
         self.myimg.set_data(data)
         self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
 
-def test_joystick():
+def test_create():
     t = test()
+    time.sleep(1)
+    t.exit()
+
+def test_play()
     t.start()
     time.sleep(1)
     t.mygraph.xylim = (None, None, 0, 1)
