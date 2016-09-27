@@ -48,6 +48,19 @@ PREUPDATEMETHOD = "_pre_update"
 UPDATEGUIMETHOD = "show"
 # nombre de pts gardés en mémoire en X
 
+doc_cst = {'INITMETHOD': INITMETHOD,
+           'UPDATEMETHOD': UPDATEMETHOD}
+__doc__ = """Here are some useful constants:
+
+             .. py:data:: INITMETHOD
+
+                = '_init'
+
+             .. py:data:: UPDATEMETHOD
+
+                = '_update'
+          """
+
 
 MATKWARGS = [item[4:] \
                 for item in mat.lines.Line2D.__dict__.keys() \

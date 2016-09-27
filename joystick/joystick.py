@@ -38,8 +38,8 @@ class Joystick(object):
         Main class to be wrapped (see ./joystick/example.py)
 
         [Optional]
-          * Create a custom method ``core.INITMETHOD`` to add to the initialization of
-            the class.
+          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
+            initialization of the frame.
 
         Kwargs:
           * Will be passed to the optional custom methods

@@ -40,12 +40,12 @@ class Text(Frame):
                  mark_line=True, mark_fmt='%H:%M:%S > ', scrollbar=True,
                  **kwargs):
         """
-        Initialises a text-frame. Use :py:func:`Text.add_text` to add text to it.
+        Initialises a text-frame. Use :py:func:`~joystick.text.Text.add_text` to add text to it.
 
         [Optional]
-          * Create a custom method ``core.INITMETHOD`` to add to the
+          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
             initialization of the frame.
-          * Create a custom method ``core.UPDATEMETHOD`` to add code at
+          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD` to add code at
             the updating of the frame.
 
         Args:
@@ -123,7 +123,7 @@ class Text(Frame):
         Re-initializes the frame, i.e. closes the current frame if
         necessary and creates a new one. Uses the parameters of
         initialization by default or anything provided through kwargs.
-        See class :py:class:`Text` for the description of input parameters.
+        See class :py:class:`~joystick.text.Text` for the description of input parameters.
         """
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)

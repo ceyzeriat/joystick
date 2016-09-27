@@ -43,9 +43,9 @@ class Image(Frame):
         Initialises an image-frame.
 
         [Optional]
-          * Create a custom method ``core.INITMETHOD`` to add to the
+          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
             initialization of the frame.
-          * Create a custom method ``core.UPDATEMETHOD`` to add code at
+          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD` to add code at
             the updating of the frame.
 
         Args:

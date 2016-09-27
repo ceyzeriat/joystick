@@ -37,13 +37,13 @@ class Frame(object):
                  screen_relative=False, **kwargs):
         """
         Initialises a frame, a base-class used to contain a e.g.
-        :py:class:`Graph` or :py:class:`Text`.
+        :py:class:`~joystick.graph.Graph` or :py:class:`~joystick.text.Text`.
 
         [Optional]
-          * Create a custom method ``core.INITMETHOD`` to add to the
-            initialization of the frame.
-          * Create a custom method ``core.UPDATEMETHOD`` to add code at
-            the updating of the frame.
+          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to
+            add to the initialization of the frame.
+          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD`
+            to add code at the updating of the frame.
 
         Args:
           * name (str): the frame name
@@ -120,7 +120,8 @@ class Frame(object):
         Re-initializes the frame, i.e. closes the current frame if
         necessary and creates a new one. Uses the parameters of
         initialization by default or anything provided through kwargs.
-        See class :py:class:`Frame` for the description of input parameters.
+        See class :py:class:`~joystick.frame.Frame` for the description
+        of input parameters.
         """
         try:
             self.exit()

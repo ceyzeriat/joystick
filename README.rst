@@ -79,7 +79,12 @@ Straight to the point: check-out this example. It generates fake random data (yd
     t = test()
     t.start()
 
-Now you should see a 'snake' going through the graph-frame, but after 10 seconds it is gone (that was on purpose, for the sake of the demo!). Type (line by line):
+Here is what it should look like:
+
+.. image:: https://raw.githubusercontent.com/ceyzeriat/joystick/master/docs/img/view.png
+   :align: center
+
+You should see a 'snake' going through the graph-frame, but after 10 seconds it is gone (that was on purpose, for the sake of the demo!). Type (line by line):
 
 .. code-block:: python
 
@@ -87,12 +92,7 @@ Now you should see a 'snake' going through the graph-frame, but after 10 seconds
     t.mygraph.freq_up = 2
     t.mygraph.xylim = (None, None, 0, 1)
 
-Now that should be better, displaying the latest 50 points at a slower pace (twice a second), and the x-axis is auto-adjusting. Here is what it should look like:
-
-.. image:: https://raw.githubusercontent.com/ceyzeriat/joystick/master/docs/img/view.png
-   :align: center
-
-Let's stop and reinitialize the graph with slightly different parameters:
+Now that should be better, displaying the latest 50 points at a slower pace (twice a second), and the x-axis is auto-adjusting. Let's stop and reinitialize the graph with slightly different parameters:
 
 .. code-block:: python
 

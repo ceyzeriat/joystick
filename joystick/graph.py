@@ -41,15 +41,15 @@ class Graph(Frame):
                  xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
                  **kwargs):
         """
-        Initialises a graph-frame. Use :py:func:`Graph.set_xydata` and
-        :py:func:`Graph.get_xydata` to set and get the x- and y-data of the
-        graph, or :py:func:`Graph.set_xylim` and :py:func:`Graph.get_xylim` to
+        Initialises a graph-frame. Use :py:func:`~joystick.graph.Graph.set_xydata` and
+        :py:func:`~joystick.graphGraph.get_xydata` to set and get the x- and y-data of the
+        graph, or :py:func:`~joystick.graphGraph.set_xylim` and :py:func:`~joystick.graphGraph.get_xylim` to
         get and set the axes limits.
 
         [Optional]
-          * Create a custom method ``core.INITMETHOD`` to add to the
+          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
             initialization of the frame.
-          * Create a custom method ``core.UPDATEMETHOD`` to add code at
+          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD` to add code at
             the updating of the frame.
 
         Args:
@@ -139,7 +139,7 @@ class Graph(Frame):
         Re-initializes the frame, i.e. closes the current frame if
         necessary and creates a new one. Uses the parameters of
         initialization by default or anything provided through kwargs.
-        See class :py:class:`Graph` for the description of input parameters.
+        See class :py:class:`~joystick.graph.Graph` for the description of input parameters.
         """
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)
