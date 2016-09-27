@@ -57,9 +57,9 @@ class test(Joystick):
                          Text(name="Y-overflow",
                               size=(500, 250), pos=(600, 50), freq_up=1))
         self.myimg = self.add_frame(
-                      Image(name="IMG", size=(100, 100), pos=(50, 600),
-                               screen_relative=False, axrect=(0,0,1,1), freq_up=3,
-                               cm_bounds = (0, 1)))
+                        Image(name="IMG", size=(100, 100), pos=(50, 600),
+                              axrect=(0,0,1,1), freq_up=3,
+                              cm_bounds = (0, 1)))
 
     @_infinite_loop(wait_time=0.2)
     def _generate_fake_data(self):  # function looped every 0.2 second
@@ -96,7 +96,8 @@ def test_create():
     time.sleep(1)
     t.exit()
 
-def test_play()
+def test_play():
+    t = test()
     t.start()
     time.sleep(1)
     t.mygraph.xylim = (None, None, 0, 1)
