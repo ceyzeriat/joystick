@@ -35,6 +35,10 @@ from ..image import Image
 from ..text import Text
 from .. import core
 
+
+# VERY IMPORTANT - screen_relative must be False for testing (not supported by
+#   Travis)
+
 class test(Joystick):
    # initialize the infinite loop decorator
     _infinite_loop = deco_infinite_loop()
@@ -49,19 +53,19 @@ class test(Joystick):
         # create a graph frame
         self.mygraph = self.add_frame(
                           Graph(name="test", size=(500, 500),
-                                screen_relative=True,
                                 pos=(50, 50), fmt="go-", xnpts=15,
                                 freq_up=7, bgcol="y", xylim=(0,10,0,1)))
         # create a text frame
         self.mytext = self.add_frame(
                          Text(name="Y-overflow",
                               size=(500, 250), pos=(600, 50), freq_up=1))
+        # create a image frame
         self.myimg = self.add_frame(
                         Image(name="IMG", size=(100, 100), pos=(50, 600),
                               axrect=(0,0,1,1), freq_up=3,
                               cm_bounds = (0, 1)))
 
-    @_infinite_loop(wait_time=0.2)
+    @_infinite_loop(wait_time=1)
     def _generate_fake_data(self):  # function looped every 0.2 second
         """
         Loop starting with simulation start, getting data and
