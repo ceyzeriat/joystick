@@ -86,8 +86,8 @@ class Frame(object):
         if bool(kwargs.pop('screen_relative')):
             w = self._window.winfo_screenwidth()
             h = self._window.winfo_screenheight()
-            pos = np.round(np.array(pos) * (w, h)).astype(int)
-            size = np.round(np.array(size) * (w, h)).astype(int)
+            pos = tuple(np.round(np.array(pos) * (w, h)).astype(int))
+            size = tuple(np.round(np.array(size) * (w, h)).astype(int))
         self._window.geometry("{}x{}+{}+{}".format(*(size + pos)))
         core.callit(self, core.INITMETHOD, **kwargs)
 

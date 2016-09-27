@@ -28,6 +28,8 @@ import matplotlib as mat
 mat.use('TkAgg')
 from matplotlib import lines
 from matplotlib.backends import backend_tkagg
+import matplotlib.cm
+from matplotlib.pyplot import Normalize as matplotlibpyplotNormalize
 try:
     import Tkinter as tkinter
 except ImportError:
@@ -74,6 +76,30 @@ TKKWARGS = ['background', 'borderwidth', 'cursor', 'exportselection', 'font',
             'relief', 'selectbackground', 'selectborderwidth',
             'selectforeground', 'setgrid', 'takefocus', 'xscrollcommand',
             'yscrollcommand']
+
+
+def cm_bounds_to_norm(cm_bounds, data=None):
+    cmin = float(cm_bounds[0]) if cm_bounds[0] is not None \
+               else (np.min(data) if data is not None else 0)
+    cmax = float(cm_bounds[1]) if cm_bounds[1] is not None \
+               else (np.max(data) if data is not None else cmin+1)
+    return matplotlibpyplotNormalize(cmin, cmax)
+
+
+def colorbar(cmap="jet", cm_bounds=(0, 1)):
+    """
+    cmap, norm, mappable = colorbar('jet', min, max)
+    plt.scatter(x, y, c, cmap=cmap, norm=norm)
+    cb = plt.colorbar(mappable)
+    if arr is given, forces cm_min and cm_max to min-max of the arr
+    """
+    if isinstance(cmap, str):
+        cmap = mat.cm.get_cmap(cmap)
+    cmin, cmax = list(map(float, cm_bounds[:2]))
+    norm = matplotlibpyplotNormalize(cmin, cmax)
+    mappable = mat.cm.ScalarMappable(cmap=cmap, norm=norm)
+    mappable._A = []
+    return cmap, norm, mappable
 
 
 def matkwargs(kwargs):

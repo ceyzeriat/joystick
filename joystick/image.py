@@ -26,19 +26,21 @@
 
 from . import core
 tkinter = core.tkinter
+FigureCanvasTkAgg = core.mat.backends.backend_tkagg.FigureCanvasTkAgg
+cm = core.mat.cm
+np = core.np
 time = core.time
 from .frame import Frame
 
 
-__all__ = ['Text']
+__all__ = ['Image']
 
 
 class Image(Frame):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
-                 screen_relative=False, background="black",
-                 foreground='green', rev=True, font=("consolas", 11),
-                 mark_line=True, mark_fmt='%H:%M:%S > ', scrollbar=True,
-                 **kwargs):
+                 screen_relative=False, background="black", foreground='green',
+                 cmap='gist_earth', cm_bounds=(None, None), unitperpx=1.,
+                 axrect=(0.1, 0.1, 0.9, 0.9), grid=None, **kwargs):
         """
         Initialises an image-frame.
 
@@ -59,9 +61,20 @@ class Image(Frame):
           * screen_relative (bool) [optional]: set to ``True`` to give
             ``pos`` and ``size`` as a % of the screen size, or ``False``
             to give then as pixels
+          * cmap (colormap name) [optional]: the colormap of the image
+          * cm_bounds (tuple of 2 float) [optional]: the (min, max)
+            values of the colormap
+          * unitperpx (float) [optional]: unit scaling
+          * axrect (list of 4 floats) [optional]: the axes bounds (l,b,w,h)
+            as in ``plt.figure.add_axes(rect=(l,b,w,h))``
+          * grid (color or None) [optional]: the grid color, or no grid
+            if ``None``
 
         Kwargs:
-          * Any parameters accepted by ``tkinter.Text`` (non-abbreviated)
+          * aspect: see ``plt.imshow``, default 'auto'
+          * origin: see ``plt.imshow``, default 'lower'
+          * Any non-abbreviated parameter accepted by ``figure.add_axes``
+            and ``plt.imshow``
           * Will be passed to the optional custom methods
         """
         # save input for reinit
@@ -70,9 +83,14 @@ class Image(Frame):
         kwargs['pos'] = pos
         kwargs['size'] = size
         kwargs['screen_relative'] = screen_relative
+        kwargs['cmap'] = cmap
+        kwargs['cm_bounds'] = cm_bounds
+        kwargs['unitperpx'] = unitperpx
+        kwargs['axrect'] = axrect
+        kwargs['grid'] = grid
         self._kwargs = kwargs
         # call mummy init
-        super(Text, self).__init__(**self._kwargs)
+        super(Image, self).__init__(**self._kwargs)
         # call ya own init
         self._init_base(**self._kwargs)
 
@@ -80,10 +98,7 @@ class Image(Frame):
         """
         Separate function from __init__ for re-initialization purpose
         """
-        self.xnptsmax = int(kwargs.pop('xnptsmax'))
-        self.xylim = tuple(kwargs.pop('xylim')[:4])
-        self.axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
-        self.xnpts = int(kwargs.pop('xnpts'))
+        self._everset = False
         axrect = tuple(kwargs.pop('axrect')[:4])
         self._fig = core.mat.figure.Figure()
         self.ax = self._fig.add_axes(axrect[:2] + (axrect[2]-axrect[0],
@@ -97,74 +112,109 @@ class Image(Frame):
         self._canvas._tkcanvas.pack(side=tkinter.TOP,
                                     fill=tkinter.BOTH,
                                     expand=True)
-        self.ax.set_axis_bgcolor(kwargs.pop('bgcol'))
         grid = kwargs.pop('grid')
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
-        self.ax.plot(0, 0, kwargs.pop('fmt'), **core.matkwargs(kwargs))
+        self.reset_image(data=[[0, 0],[0, 0]], **kwargs)
         core.callit(self, core.PREUPDATEMETHOD)
         core.callit(self, core.INITMETHOD, **kwargs)
+
+    @property
+    def cmap(self):
+        """
+        The colormap name of the image
+        """
+        return self._cmap.name
+
+    @cmap.setter
+    def cmap(self, value):
+        if isinstance(value, str):
+            if value in cm.datad.keys():
+                self._cmap = cm.get_cmap(value)
+        else:
+            self._cmap = value
+        if self._everset:
+            self._img.set_cmap(self._cmap)
+    
+    @property
+    def cm_bounds(self):
+        """
+        The (min, max) values of the colormap.
+        """
+        return self._norm.vmin, self._norm.vmax
+
+    @cm_bounds.setter
+    def cm_bounds(self, value):
+        if self._everset:
+            self._set_norm(cm_bounds=value, data=self.get_data())
+            self._img.set_norm(self._norm)
+        else:
+            self._set_norm(cm_bounds=value)
+
+    def _set_norm(self, cm_bounds, data=None):
+        """
+        Set the plt.Normalize from cm_bounds and optional data
+        """
+        self._norm = core.cm_bounds_to_norm(cm_bounds=cm_bounds, data=data)
+
+    def reset_image(self, data=None, **kwargs):
+        """
+        Resets the image in the frame (cmap, cm_bounds), axes, etc,
+        using the kwargs provided (default is values of initialization).
+        See :py:class:`~joystick.image.Image` for accepted parameters.
+        """
+        # updates with new reinit value if specified
+        for key, v in self._kwargs.items():
+            if key not in kwargs.keys():
+                kwargs[key] = v
+        self.cmap = self._kwargs.get('cmap')
+        self._set_norm(cm_bounds=kwargs.get('cm_bounds'), data=data)
+        unitperpx = float(kwargs.get('unitperpx'))
+        extent = np.asarray(np.shape(data))*unitperpx*0.5
+        extent = [-extent[1], extent[1], -extent[0], extent[0]]
+        self._img = self.ax.imshow(data, cmap=self._cmap, norm=self._norm,
+                                   origin=kwargs.get('origin', 'lower'),
+                                   aspect=kwargs.get('aspect', 'auto'),
+                                   extent=extent, **core.matkwargs(kwargs))
+        self._everset = True
 
     def reinit(self, **kwargs):
         """
         Re-initializes the frame, i.e. closes the current frame if
         necessary and creates a new one. Uses the parameters of
         initialization by default or anything provided through kwargs.
-        See :class:`Text` for the description of input parameters.
+        See :class:`Image` for the description of input parameters.
         """
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)
         # call mummy reinit
-        super(Text, self).reinit(**self._kwargs)
+        super(Image, self).reinit(**self._kwargs)
         # ya own reinit
         self._init_base(**self._kwargs)
 
     def show(self):
         """
-        Updates the text
+        Updates the image
         """
         if self.visible:
-            self._text.update_idletasks()
+            self._canvas.draw()
 
-    def _pre_update(self):
-        n = len(self._lines_to_insert)
-        for i in range(n):
-            if self._isempty:
-                self._isempty = False
-            self._text.insert(self._lines_to_insert[0][0],
-                              self._lines_to_insert[0][1])
-            self._lines_to_insert.pop(0)
-
-    def add_text(self, txt="", end=None, newline=True, mark_line=None):
+    def set_data(self, data):
         """
-        Adds the text ``txt`` to the frame, on a newline if ``newline``
-        is ``True``.
-        The new ``txt`` is prepended using the format in ``self.mark_fmt``
-        if ``mark_line`` is ``True``, default is ``self.mark_line``.
-        It is added at the end of the frame text if ``rev`` is ``True``,
-        default is ``not self.rev``.
-        """
-        if not self.visible:
-            return
-        mark_line = bool(mark_line) \
-                        if mark_line is not None else self.mark_line
-        if mark_line:
-            addon = time.strftime(self.mark_fmt)
-        in_the_end = bool(end) if end is not None else not self.rev
-        nl_f = "\n" if in_the_end and not self._isempty and newline else ""
-        nl_e = "\n" if not in_the_end and not self._isempty and newline else ""
-        #self._text._lines_to_
-        self._lines_to_insert.append([
-            tkinter.END if in_the_end else '1.0',
-            "{}{}{}{}".format(nl_f,
-                                            addon if mark_line else "",
-                                            txt,
-                                            nl_e)])
-
-    def clear(self):
-        """
-        Flushes the text in the frame
+        Sets the image. If the data shape does not corerspond to the
+        current data shape, the :py:func:`~joystick.image.Image.reset_image` is called.
         """
         if self.visible:
-            self._text.delete('1.0', tkinter.END)
-        self._isempty = True
+            old_data = self.get_data()
+            if not self._everset or old_data.shape != data.shape:
+                self.reset_image(data=data)
+            else:
+                if not np.allclose(old_data, data):
+                    self._img.set_data(data)
+
+    def get_data(self):
+        """
+        Returns the image.
+        """
+        if self.visible and self._everset:
+            return self._img.get_array().data

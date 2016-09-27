@@ -31,6 +31,7 @@ import time
 from ..joystick import Joystick
 from ..deco import deco_infinite_loop
 from ..graph import Graph
+from ..image import Image
 from ..text import Text
 from .. import core
 
@@ -48,12 +49,17 @@ class test(Joystick):
         # create a graph frame
         self.mygraph = self.add_frame(
                           Graph(name="test", size=(500, 500),
+                                screen_relative=True,
                                 pos=(50, 50), fmt="go-", xnpts=15,
                                 freq_up=7, bgcol="y", xylim=(0,10,0,1)))
         # create a text frame
         self.mytext = self.add_frame(
                          Text(name="Y-overflow",
                               size=(500, 250), pos=(600, 50), freq_up=1))
+        self.myimg = self.add_frame(
+                      Image(name="IMG", size=(0.5, 0.5), pos=(0.2, 0.2),
+                               screen_relative=True, axrect=(0,0,1,1), freq_up=3,
+                               cm_bounds = (0, 1)))
 
     @_infinite_loop(wait_time=0.2)
     def _generate_fake_data(self):  # function looped every 0.2 second
@@ -72,13 +78,18 @@ class test(Joystick):
         # check overflow for the last data point added
         if self.ydata[-1] > 1:
             # send warning to the text-frame
-            self.mytext.add_text('Some data bumped into the ceiling: '
+            self.mytext.add_text('Some data bumped into the ceiling: ' \
                                  '{:.3f}'.format(self.ydata[-1]))
         # prepare the time axis
         t = np.round(self.xdata-self._t0, 1)
         # push new data to the graph
         self.mygraph.set_xydata(t, self.ydata)
 
+    @_infinite_loop(wait_time=5)
+    def _generate_fake_image(self):  # function looped every 5 second
+        data = np.random.random((10,10))**3
+        self.myimg.set_data(data)
+        self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
 
 def test_joystick():
     t = test()

@@ -73,7 +73,7 @@ class Text(Frame):
         Kwargs:
           * wrap (str): wrap mechanism (default 'word')
           * undo (bool): authorized undoing if ``True``
-          * Any parameters accepted by ``tkinter.Text`` (non-abbreviated)
+          * Any non-abbreviated parameter accepted by ``tkinter.Text``
           * Will be passed to the optional custom methods
         """
         # save input for reinit

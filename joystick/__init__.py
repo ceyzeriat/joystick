@@ -35,6 +35,7 @@ __doc__ = """
 
 from .core import *
 from .graph import *
+from .image import *
 from .text import *
 from .joystick import *
 from .deco import *

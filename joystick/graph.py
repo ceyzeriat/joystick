@@ -81,8 +81,8 @@ class Graph(Frame):
             calculated from the data (i.e. some xylim is ``None``)
 
         Kwargs:
-          * Any parameters accepted by ``figure.add_axes`` and ``plt.plot``
-            (non-abbreviated)
+          * Any non-abbreviated parameter accepted by ``figure.add_axes``
+            and ``plt.plot``
           * Will be passed to the optional custom methods
         """
         kwargs['name'] = name

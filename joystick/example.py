@@ -49,7 +49,11 @@ class test(jk.Joystick):
         # create a text frame
         self.mytext = self.add_frame(
                       jk.Text(name="Y-overflow", size=(500, 250),
-                              pos=(600, 50), freq_up=1))
+                              pos=(600, 50), freq_up=2))
+        self.myimg = self.add_frame(
+                      jk.Image(name="IMG", size=(0.5, 0.5), pos=(0.2, 0.2),
+                               screen_relative=True, axrect=(0,0,1,1), freq_up=3,
+                               cm_bounds = (0, 1)))
 
     @_infinite_loop(wait_time=0.2)
     def _generate_fake_data(self):  # function looped every 0.2 second
@@ -74,6 +78,12 @@ class test(jk.Joystick):
         t = np.round(self.xdata-self._t0, 1)
         # push new data to the graph
         self.mygraph.set_xydata(t, self.ydata)
+
+    @_infinite_loop(wait_time=5)
+    def _generate_fake_image(self):  # function looped every 5 second
+        data = np.random.random((10,10))**3
+        self.myimg.set_data(data)
+        self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
 
 t = test()
 t.start()
