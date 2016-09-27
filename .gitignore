@@ -19,6 +19,8 @@ docs/_build
 docs/_templates
 docs/_static
 docs/old_docs
+*.pdf
+*.zip
 
 # Packages/installer info
 *.egg
