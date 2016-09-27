@@ -14,7 +14,7 @@
 
 Joystick provides a light-weight and simple framework to real-time data-plotting and logging, while the console remains accessible to manage the on-going simulation and data acquisition.
 
-In some ways, this framework can replace a Graphical User Interface (GUI) on many projects, as long as 1) the user is confortable enough with managing the simulation using command-lines, and 2) the display of the real-time data is not too complex.
+In some ways, this framework can replace a Graphical User Interface (GUI) on many projects, as long as 1) the user is comfortable enough with managing the simulation using command-lines, and 2) the display of the real-time data is not too complex.
 
 Allright. Let's say you have some data-stream (serial port, web scraping, on-going simulation or experiment, etc), and you would like to plot or log in real-time whatever is happening. In addition you would also like to send commands to interact with the mechanisms producing the data... without having to build a GUI (which looks pretty to your boss, but is time-consumming both in initial design and maintenance).
 
@@ -58,10 +58,12 @@ Straight to the point: check-out this example. It generates fake random data (yd
             """
             # concatenate data on the time x-axis
             self.xdata = jk.core.add_datapoint(self.xdata,
-                                               time.time())
+                                               time.time(),
+                                               xnptsmax=self.mygraph.xnptsmax)
             # concatenate data on the fake data y-axis
             self.ydata = jk.core.add_datapoint(self.ydata,
-                                               np.random.random()*1.05)
+                                               np.random.random()*1.05,
+                                               xnptsmax=self.mygraph.xnptsmax)
             # check overflow for the last data point added
             if self.ydata[-1] > 1:
                 # send warning to the text-frame
@@ -75,13 +77,13 @@ Straight to the point: check-out this example. It generates fake random data (yd
     t = test()
     t.start()
 
-Now you should see a 'snake' going through the graph-frame, but after 10 seconds it is gone. Type (line by line):
+Now you should see a 'snake' going through the graph-frame, but after 10 seconds it is gone (that was on purpose, for the sake of the demo!). Type (line by line):
 
 .. code-block:: python
 
-    t.mygraph.xylim = (None, None, 0, 1)
     t.mygraph.xnpts = 50
     t.mygraph.freq_up = 2
+    t.mygraph.xylim = (None, None, 0, 1)
 
 Now that should be better, displaying the latest 50 points at a slower pace (twice a second), and the x-axis is auto-adjusting. Here is what it should look like:
 
@@ -97,6 +99,9 @@ Let's stop and reinitialize the graph with slightly different parameters:
     t.start()
     t.stop()
     t.exit()
+
+Too easy!
+
 
 Documentation
 =============

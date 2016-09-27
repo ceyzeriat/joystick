@@ -33,11 +33,38 @@ __all__ = ['Frame']
 
 
 class Frame(object):
+    """
+    Initialises a frame, a base-class used to contain a e.g.
+    :class:`Graph` or :class:`Text`.
+
+    [Optional]
+      * Create a custom method ``{0}`` to add to the initialization of
+        the frame.
+      * Create a custom method ``{1}`` to add code at the updating of
+        the frame.
+
+    Args:
+      * daddy (:class:`Joystick`): the Joystick class that contains the
+        frame
+      * name (str): the frame name
+      * freq_up (float or None): the frequency of update of the frame,
+        between 1e-3 and 1e3 Hz, or ``None`` for no update
+      * pos (px or %) [optional]: left-top corner position of the
+        frame, see ``screen_relative``
+      * size (px or %) [optional]: width-height dimension of the
+        frame, see ``screen_relative``
+      * screen_relative (bool) [optional]: set to ``True`` to give
+        ``pos`` and ``size`` as a % of the screen size, or ``False``
+        to give then as pixels
+
+    Kwargs:
+      * Will be passed to the optional custom methods
+
+    Raises:
+      N/A
+    """.format(core.INITMETHOD, core.UPDATEMETHOD)
     def __init__(self, daddy, name, freq_up, pos=(50, 50), size=(400, 400),
                  screen_relative=False, **kwargs):
-        """
-        Initialization
-        """
         # save input for reinit
         kwargs['daddy'] = daddy
         kwargs['name'] = name
@@ -53,6 +80,9 @@ class Frame(object):
         self._init_frame(**self._kwargs)
 
     def _init_frame(self, **kwargs):
+        """
+        Separate function from __init__ for re-initialization purpose
+        """
         self.freq_up = float(kwargs.pop('freq_up'))
         self._running = True and not self._mummy_running
         self._visible = True
@@ -67,18 +97,28 @@ class Frame(object):
             pos = np.round(np.array(pos) * (w, h)).astype(int)
             size = np.round(np.array(size) * (w, h)).astype(int)
         self._window.geometry("{}x{}+{}+{}".format(*(size + pos)))
+        core.callit(self, core.INITMETHOD, **kwargs)
 
     @property
     def visible(self):
+        """
+        Returns ``True`` if the frame has not been closed
+        Read-only.
+        """
         return self._visible
 
     @visible.setter
     def visible(self, value):
-        print("{}Reserved attribute, use 'exit' or 'reinit' methods.{}" \
-            .format(core.font.red, core.font.normal))
+        raise Exception('hoho')
+        #print("{}Reserved attribute, use 'exit' or 'reinit' methods.{}" \
+        #    .format(core.font.red, core.font.normal))
 
     @property
     def typ(self):
+        """
+        Returns the type of the frame, e.g. ``Graph``.
+        Read-only.
+        """
         return "_{}".format(self.__class__.__name__.lower())
 
     @typ.setter
@@ -87,9 +127,10 @@ class Frame(object):
     
     def reinit(self, **kwargs):
         """
-        Re-init, closes old and creates new, input params are
-        that of the constructor.
-        'None' is reuse the previous parameters
+        Re-initializes the frame, i.e. closes the current frame if
+        necessary and creates a new one. Uses the parameters of
+        initialization by default or anything provided through kwargs.
+        See :class:`Frame` for the description of input parameters.
         """
         try:
             self.exit()
@@ -101,28 +142,40 @@ class Frame(object):
 
     @property
     def running(self):
+        """
+        Returns ``True`` if the frame should update
+        Set to ``True``/``False`` to start/stop the updating
+        """
         return self._running
     
     @running.setter
     def running(self, value):
         if value:
-            self.start()
+            self._running = True
+            self._update_loop()
         else:
-            self.stop()
+            self._running = False
 
     @property
     def freq_up(self):
+        """
+        Update frequency (Hz) of the frame.
+        Set between 1e-3 and 1e3 Hz, or ``None`` for no updating
+        """
         return self._freq_up
 
     @freq_up.setter
     def freq_up(self, value):
-        self._freq_up = np.clip(value, 1e-3, 1e3)
+        if value in [None, False]:
+            self._freq_up = None
+        else:
+            self._freq_up = np.clip(value, 1e-3, 1e3)
 
     def _update_loop(self):
         """
-        Does the calling-loop job
+        Performs the loop-calling job
         """
-        if self._mummy_running and self.running:
+        if self._mummy_running and self.running and self._freq_up is not None:
             core.callit(self, core.PREUPDATEMETHOD)
             core.callit(self, core.UPDATEMETHOD)
             self.show()
@@ -132,14 +185,13 @@ class Frame(object):
         """
         Starts updating the frame
         """
-        self._running = True
-        self._update_loop()
+        self.running = True
 
     def stop(self):
         """
         Stops updating the frame
         """
-        self._running = False
+        self.running = False
 
     def exit(self):
         """

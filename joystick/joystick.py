@@ -33,14 +33,31 @@ __all__ = ['Joystick']
 
 
 class Joystick(object):
-    def __init__(self, *args, **kwargs):
+    """
+    Main class to be wrapped (see ./joystick/example.py)
+
+    [Optional]
+      * Create a custom method ``{0}`` to add to the initialization of
+        the class.
+
+    Kwargs:
+      * Will be passed to the optional custom methods
+
+    Raises:
+      N/A
+    """.format(core.INITMETHOD)
+    def __init__(self, **kwargs):
         self._dead = False
         self._frames = []
         self._running = False
-        core.callit(self, core.INITMETHOD, *args, **kwargs)
+        core.callit(self, core.INITMETHOD, **kwargs)
 
     @property
     def running(self):
+        """
+        Returns ``True`` if the simulation is running
+        Set to ``True``/``False`` to start/stop the simulation
+        """
         return self._running
     
     @running.setter
@@ -59,33 +76,38 @@ class Joystick(object):
 
     @classmethod
     def _get_infinite_loop_fcts(self):
+        """
+        Returns a list of all functions decorated with the 
+        infinite_loop decorator
+        """
         if hasattr(self, '_infinite_loop'):
             return self._infinite_loop.fcts
         return []
 
-    def start(self, *args, **kwargs):
+    def start(self):
         """
-        Starts simulation
+        Starts the simulation
         """
         self.running = True
 
-    def stop_frames(self):
+    def start_frames(self):
         """
-        Turns on the updating of all frames
+        Turns on the updating of all frames, keeps the simulation
+        as it was, running or not
         """
         for item in self._frames:
             item.start()
 
     def stop(self):
         """
-        Stops the simulation
+        Stops the simulation and all frames
         """
         self.running = False
 
     def stop_frames(self):
         """
-        Stops all frames from updating, but the simulation
-        continues running
+        Stops all frames from updating, the simulation continues
+        running
         """
         for item in self._frames:
             item.stop()

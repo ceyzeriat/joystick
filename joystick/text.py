@@ -34,14 +34,53 @@ __all__ = ['Text']
 
 
 class Text(Frame):
+    """
+    Initialises a text-frame. Use :func:`Text.add_text` to add text to it.
+
+    [Optional]
+      * Create a custom method ``{0}`` to add to the initialization of
+        the text.
+      * Create a custom method ``{1}`` to add code at the updating of
+        the text.
+
+    Args:
+      * daddy (:class:`Joystick`): the Joystick class that contains the
+        frame
+      * name (str): the frame name
+      * freq_up (float or None): the frequency of update of the frame,
+        between 1e-3 and 1e3 Hz, or ``None`` for no update
+      * pos (px or %) [optional]: left-top corner position of the
+        frame, see ``screen_relative``
+      * size (px or %) [optional]: width-height dimension of the
+        frame, see ``screen_relative``
+      * screen_relative (bool) [optional]: set to ``True`` to give
+        ``pos`` and ``size`` as a % of the screen size, or ``False``
+        to give then as pixels
+      * background (color) [optional]: background color of the frame
+      * foreground (color) [optional]: text color of the frame
+      * rev (bool) [optional]: if ``True``, a new line will be added on
+        the top of the text
+      * font (tuple (font, size)) [optional]: the font of the text
+      * mark_line (bool) [optional]: if ``True``, each line will be
+        prepended using the ``self.mark_fmt`` format
+      * mark_fmt (str) [optional]: ``time.strftime`` format to be used
+        for prepending each text added to the frame
+      * scrollbar (bool) [optional]: if ``True``, a Y-scrollbar is added
+
+    Kwargs:
+      * wrap (str): wrap mechanism (default 'word')
+      * undo (bool): authorized undoing if ``True``
+      * Any parameters accepted by ``tkinter.Text`` (non-abbreviated)
+      * Will be passed to the optional custom methods
+
+    Raises:
+      N/A
+    """.format(core.INITMETHOD, core.UPDATEMETHOD)
     def __init__(self, daddy, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, background="black",
                  foreground='green', rev=True, font=("consolas", 11),
                  mark_line=True, mark_fmt='%H:%M:%S > ', scrollbar=True,
                  **kwargs):
-        """
-        Initialization
-        """
         # save input for reinit
         kwargs['daddy'] = daddy
         kwargs['name'] = name
@@ -68,9 +107,9 @@ class Text(Frame):
         """
         self._lines_to_insert = []
         self._isempty = True
-        self._rev = bool(kwargs.pop('rev'))
-        self._mark_line = bool(kwargs.pop('mark_line'))
-        self._mark_fmt = kwargs.pop('mark_fmt')
+        self.rev = bool(kwargs.pop('rev'))
+        self.mark_line = bool(kwargs.pop('mark_line'))
+        self.mark_fmt = kwargs.pop('mark_fmt')
         self._text = tkinter.Text(master=self._window, **core.tkkwargs(kwargs))
         self._text.config(font=kwargs.pop('font'),
                           undo=kwargs.pop('undo', True),
@@ -86,9 +125,10 @@ class Text(Frame):
 
     def reinit(self, **kwargs):
         """
-        Re-init, closes old and creates new, input params are
-        that of the constructor.
-        'None' is reuse the previous parameters
+        Re-initializes the frame, i.e. closes the current frame if
+        necessary and creates a new one. Uses the parameters of
+        initialization by default or anything provided through kwargs.
+        See :class:`Text` for the description of input parameters.
         """
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)
@@ -99,7 +139,7 @@ class Text(Frame):
 
     def show(self):
         """
-        Redraws the graph
+        Updates the text
         """
         if self.visible:
             self._text.update_idletasks()
@@ -114,13 +154,21 @@ class Text(Frame):
             self._lines_to_insert.pop(0)
 
     def add_text(self, txt="", end=None, newline=True, mark_line=None):
+        """
+        Adds the text ``txt`` to the frame, on a newline if ``newline``
+        is ``True``.
+        The new ``txt`` is prepended using the format in ``self.mark_fmt``
+        if ``mark_line`` is ``True``, default is ``self.mark_line``.
+        It is added at the end of the frame text if ``rev`` is ``True``,
+        default is ``not self.rev``.
+        """
         if not self.visible:
             return
         mark_line = bool(mark_line) \
-                        if mark_line is not None else self._mark_line
+                        if mark_line is not None else self.mark_line
         if mark_line:
-            addon = time.strftime(self._mark_fmt)
-        in_the_end = bool(end) if end is not None else not self._rev
+            addon = time.strftime(self.mark_fmt)
+        in_the_end = bool(end) if end is not None else not self.rev
         nl_f = "\n" if in_the_end and not self._isempty and newline else ""
         nl_e = "\n" if not in_the_end and not self._isempty and newline else ""
         #self._text._lines_to_
@@ -132,6 +180,9 @@ class Text(Frame):
                                             nl_e)])
 
     def clear(self):
+        """
+        Flushes the text in the frame
+        """
         if self.visible:
-            self._text.delete('1.0',tkinter.END)
+            self._text.delete('1.0', tkinter.END)
         self._isempty = True

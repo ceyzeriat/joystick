@@ -35,13 +35,57 @@ __all__ = ['Graph']
 
 
 class Graph(Frame):
+    """
+    Initialises a graph-frame. Use :func:`Graph.set_xydata` and
+    :func:`Graph.get_xydata` to set and get the x- and y-data of the
+    graph, or :func:`Graph.set_xylim` and :func:`Graph.get_xylim` to
+    get and set the axes limits.
+
+    [Optional]
+      * Create a custom method ``{0}`` to add to the initialization of
+        the graph.
+      * Create a custom method ``{1}`` to add code at the updating of
+        the graph.
+
+    Args:
+      * daddy (:class:`Joystick`): the Joystick class that contains the
+        frame
+      * name (str): the frame name
+      * freq_up (float or None): the frequency of update of the frame,
+        between 1e-3 and 1e3 Hz, or ``None`` for no update
+      * pos (px or %) [optional]: left-top corner position of the
+        frame, see ``screen_relative``
+      * size (px or %) [optional]: width-height dimension of the
+        frame, see ``screen_relative``
+      * screen_relative (bool) [optional]: set to ``True`` to give
+        ``pos`` and ``size`` as a % of the screen size, or ``False``
+        to give then as pixels
+      * xnpts (int) [optional]: the number of data points to be plotted
+      * fmt (str) [optional]: the format of the line as in
+        ``plt.plot(x, y, fmt)``
+      * bgcol (color) [optional]: the background color of the graph
+      * axrect (list of 4 floats) [optional]: the axes bounds (l,b,w,h)
+        as in ``plt.figure.add_axes(rect=(l,b,w,h))``
+      * grid (color or None) [optional]: the grid color, or no grid if
+        ``None``
+      * xylim (list of 4 floats or None) [optional]: the values of the
+        axes limits (xmin, xmax, ymin, ymax), where any value can take
+        ``None`` to be recalculated according to the data at each update
+      * xnptsmax (int) [optional]: the maximum number of data points to
+        be recorded, older data points will be deleted
+
+    Kwargs:
+      * Any parameters accepted by ``figure.add_axes`` and ``plt.plot``
+        (non-abbreviated)
+      * Will be passed to the optional custom methods
+
+    Raises:
+      N/A
+    """.format(core.INITMETHOD, core.UPDATEMETHOD)
     def __init__(self, daddy, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, xnpts=30, fmt="ro-",
                  bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
                  xylim=(0., None, 0., None), xnptsmax=50, **kwargs):
-        """
-        Initialization
-        """
         kwargs['daddy'] = daddy
         kwargs['name'] = name
         kwargs['freq_up'] = freq_up
@@ -63,6 +107,9 @@ class Graph(Frame):
         self._init_base(**self._kwargs)
 
     def _init_base(self, **kwargs):
+        """
+        Separate function from __init__ for re-initialization purpose
+        """
         self.xnptsmax = int(kwargs.pop('xnptsmax'))
         self.xylim = tuple(kwargs.pop('xylim')[:4])
         self.xnpts = int(kwargs.pop('xnpts'))
@@ -89,9 +136,10 @@ class Graph(Frame):
 
     def reinit(self, **kwargs):
         """
-        Re-init, closes old and creates new, input params are
-        that of the constructor.
-        'None' is reuse the previous parameters
+        Re-initializes the frame, i.e. closes the current frame if
+        necessary and creates a new one. Uses the parameters of
+        initialization by default or anything provided through kwargs.
+        See :class:`Graph` for the description of input parameters.
         """
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)
@@ -102,7 +150,7 @@ class Graph(Frame):
 
     def show(self):
         """
-        Redraws the graph
+        Updates the graph
         """
         if self.visible:
             self._canvas.draw()
@@ -133,7 +181,9 @@ class Graph(Frame):
 
     def set_xydata(self, x, y):
         """
-        Give x and y raw vectors
+        Sets the x and y data of the graph.
+        Give x and y vectors as numpy arrays; only the last
+        ``self.xnpts`` data-points will be displayed
         """
         if self.visible:
             self.ax.lines[0].set_xdata(x[-self.xnpts:])
@@ -141,12 +191,17 @@ class Graph(Frame):
 
     def get_xydata(self):
         """
-        Give x and y raw vectors
+        Returns the x and y data of the graph
         """
         if self.visible:
             return self.ax.lines[0].get_xdata(), self.ax.lines[0].get_ydata()
 
     def set_xylim(self, xylim=(None, None, None, None)):
+        """
+        Sets the (xmin, xmax, ymin, ymax) limits of the graph.
+        Set one or several values to ``None`` to auto-adjust the limits
+        of the graph to its x- or y-data.
+        """
         if not self.visible:
             return
         xmin, xmax, ymin, ymax = xylim
@@ -161,6 +216,9 @@ class Graph(Frame):
             self.ax.set_ylim([ymin, ymax])
 
     def get_xylim(self):
+        """
+        Returns the (xmin, xmax, ymin, ymax) limits of the graph
+        """
         if self.visible:
             return self.ax.get_xlim() + self.ax.get_ylim()
 

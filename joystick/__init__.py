@@ -24,8 +24,18 @@
 #
 ###############################################################################
 
+import os
+
+PAT = os.path.dirname(os.path.abspath(__file__))
+PAT = PAT.split(os.path.sep)[:-1]
+
+__doc__ = """
+{0}
+""".format(open(os.path.join(os.path.sep, os.path.sep.join(PAT), 'README.rst'), 'r').read())
+
 from .core import *
 from .graph import *
 from .text import *
 from .joystick import *
 from .deco import *
+from ._version import __version__, __major__, __minor__, __micro__

@@ -64,14 +64,25 @@ TKKWARGS = ['background', 'borderwidth', 'cursor', 'exportselection', 'font',
 
 
 def matkwargs(kwargs):
+    """
+    Returns a copy of kwargs that contains only keys existing
+    to matplotlib
+    """
     return extract_kwargs(kwargs, MATKWARGS)
 
 
 def tkkwargs(kwargs):
+    """
+    Returns a copy of kwargs that contains only keys existing
+    to tkinter
+    """
     return extract_kwargs(kwargs, TKKWARGS)
 
 
 def extract_kwargs(kwargs, ll):
+    """
+    Returns a copy of kwargs that contains only keys found in ll
+    """
     dic = {}
     for key, v in kwargs.items():
         if key in ll:
@@ -80,11 +91,19 @@ def extract_kwargs(kwargs, ll):
 
 
 def callit(self, methodstr, *args, **kwargs):
+    """
+    Calls self.'methodstr' after having tests that it exists and that
+    it is callable
+    """
     if callable(getattr(self, methodstr, None)):
         return getattr(self, methodstr)(*args, **kwargs)
 
 
 def add_datapoint(ar, ar2, xnptsmax=None):
+    """
+    Concatenates ar2 to ar (either int/float or 1-dim vectors)
+    Optionally, 
+    """
     if xnptsmax is None:
         return np.r_[ar, ar2]
     else:
@@ -92,10 +111,17 @@ def add_datapoint(ar, ar2, xnptsmax=None):
 
 
 def timestamp():
+    """
+    time.time()
+    """
     return time.time()
 
 
 def append(self, attr, v):
+    """
+    Appends v to self.'attr' (creates an empty list if it does not
+        exist yet)
+    """
     if hasattr(self, attr):
         getattr(self, attr).append(v)
     else:

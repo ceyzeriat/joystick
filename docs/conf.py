@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# oif documentation build configuration file, created by
+# joystick documentation build configuration file, created by
 # sphinx-quickstart on Fri Apr 24 15:26:23 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -14,7 +14,7 @@
 
 import sys
 import os
-from ..soif import __version__, __major__, __minor__, __micro__
+from ..joystick import __version__, __major__, __minor__, __micro__
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

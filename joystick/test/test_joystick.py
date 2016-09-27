@@ -61,10 +61,12 @@ class test(Joystick):
         """
         # concatenate data on the time x-axis
         self.xdata = core.add_datapoint(self.xdata,
-                                           time.time())
+                                        time.time(),
+                                        xnptsmax=self.mygraph.xnptsmax)
         # concatenate data on the fake data y-axis
         self.ydata = core.add_datapoint(self.ydata,
-                                           np.random.random()*1.05)
+                                        np.random.random()*1.05,
+                                        xnptsmax=self.mygraph.xnptsmax)
         # check overflow for the last data point added
         if self.ydata[-1] > 1:
             # send warning to the text-frame

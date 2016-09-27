@@ -44,18 +44,20 @@ def deco_infinite_loop(wait_time=0.5):
     simultaneously with the joystick.start() method.
 
     However, it must be initialized at run-time before use:
-    > class yuhu(joystick.Joystick):
-    >     _infinite_loop = joystick.deco_infinite_loop()
-    >     ...
+
+    >>> class yuhu(joystick.Joystick):
+    >>>     _infinite_loop = joystick.deco_infinite_loop()
+    >>>     ...
     (the reason is that it must get a memory copy of the decorator
      function in order to record the decorated functions in the
      desired scope, not in the pakage import scope.
      In short, just initilize it as above and it will work)
 
     It then can be used normally:
-    > @_infinite_loop(wait_time=0.5)  # in sec
-    > def repetitive_task():
-    >     print("Next time I'm done I swear.")
+
+    >>> @_infinite_loop(wait_time=0.5)  # in sec
+    >>> def repetitive_task():
+    >>>     print("Next time I'm done I swear.")
     """
     # just a layer to get a memory copy of the decorator at run-time
     def infinite_loop_static(wait_time=wait_time):  # in sec
