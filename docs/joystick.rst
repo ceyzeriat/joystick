@@ -20,14 +20,6 @@ joystick.deco module
     :undoc-members:
     :show-inheritance:
 
-joystick.example module
------------------------
-
-.. automodule:: joystick.example
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 joystick.frame module
 ---------------------
 
@@ -40,6 +32,14 @@ joystick.graph module
 ---------------------
 
 .. automodule:: joystick.graph
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+joystick.image module
+---------------------
+
+.. automodule:: joystick.image
     :members:
     :undoc-members:
     :show-inheritance:

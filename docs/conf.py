@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# joystick documentation build configuration file, created by
+# Documentation build configuration file, created by
 # sphinx-quickstart on Fri Apr 24 15:26:23 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -15,6 +15,19 @@
 import sys
 import os
 from ..joystick import __version__, __major__, __minor__, __micro__
+import time
+
+package_name = u'joystick'
+package_name_cap = u'Joystick'
+description = u'Real-time plotting and logging while console controlling'
+
+def skip(app, what, name, obj, skip, options):
+    if name == "__init__":
+        return False
+    return skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,8 +59,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'joystick'
-copyright = u'2016, Guillaume Schworer'
+project = package_name
+copyright = u'{:d}, Guillaume Schworer'.format(time.localtime()[0])
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -72,7 +85,9 @@ release = __version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+# other_exclude = '{0}test#{0}test_*#{0}*_test*#{0}*example*#{0}core*#{0}*version*'.format('../{}/'.format(package_name)).split('#')
+
+exclude_patterns = ['_build'] #+ other_exclude
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -181,7 +196,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'joystickdoc'
+htmlhelp_basename = u'{}doc'.format(package_name_cap)
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -201,7 +216,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'joystick.tex', u'joystick Documentation',
+  ('index', '{}.tex'.format(package_name), u'{} Documentation'.format(package_name_cap),
    u'Guillaume Schworer', 'manual'),
 ]
 
@@ -231,7 +246,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'joystick', u'joystick Documentation',
+    ('index', package_name, u'{} Documentation'.format(package_name_cap),
      [u'Guillaume Schworer'], 1)
 ]
 
@@ -245,8 +260,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'joystick', u'joystick Documentation',
-   u'Guillaume Schworer', 'joystick', 'Real-time plotting and logging while console controlling',
+  ('index', package_name, u'{} Documentation'.format(package_name_cap),
+   u'Guillaume Schworer', package_name, description,
    'Miscellaneous'),
 ]
 

@@ -43,12 +43,14 @@ Straight to the point: check-out this example. It generates fake random data (yd
             self.xdata = np.array([self._t0])  # time x-axis
             self.ydata = np.array([0.0])  # fake data y-axis
             # create a graph frame
-            self.mygraph = jk.Graph(daddy=self, name="test", size=(500, 500),
-                                    pos=(50, 50), fmt="go-", xnpts=15,
-                                    freq_up=7, bgcol="y", xylim=(0,10,0,1))
+            self.mygraph = self.add_frame(
+                       jk.Graph(name="test", size=(500, 500), pos=(50, 50),
+                                fmt="go-", xnpts=15, freq_up=7, bgcol="y",
+                                xylim=(0,10,0,1)))
             # create a text frame
-            self.mytext = jk.Text(daddy=self, name="Y-overflow",
-                                  size=(500, 250), pos=(600, 50), freq_up=1)
+            self.mytext = self.add_frame(
+                          jk.Text(name="Y-overflow", size=(500, 250),
+                                  pos=(600, 50), freq_up=1))
 
         @_infinite_loop(wait_time=0.2)
         def _generate_fake_data(self):  # function looped every 0.2 second
@@ -114,6 +116,7 @@ Requirements
 
 Joystick requires the following Python packages:
 
+* tkinter: for the frames GUI
 * NumPy: for basic numerical routines
 * matplotlib: for plotting
 

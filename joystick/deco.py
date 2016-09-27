@@ -48,6 +48,7 @@ def deco_infinite_loop(wait_time=0.5):
     >>> class yuhu(joystick.Joystick):
     >>>     _infinite_loop = joystick.deco_infinite_loop()
     >>>     ...
+    
     (the reason is that it must get a memory copy of the decorator
      function in order to record the decorated functions in the
      desired scope, not in the pakage import scope.

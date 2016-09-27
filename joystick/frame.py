@@ -33,48 +33,40 @@ __all__ = ['Frame']
 
 
 class Frame(object):
-    """
-    Initialises a frame, a base-class used to contain a e.g.
-    :class:`Graph` or :class:`Text`.
-
-    [Optional]
-      * Create a custom method ``{0}`` to add to the initialization of
-        the frame.
-      * Create a custom method ``{1}`` to add code at the updating of
-        the frame.
-
-    Args:
-      * daddy (:class:`Joystick`): the Joystick class that contains the
-        frame
-      * name (str): the frame name
-      * freq_up (float or None): the frequency of update of the frame,
-        between 1e-3 and 1e3 Hz, or ``None`` for no update
-      * pos (px or %) [optional]: left-top corner position of the
-        frame, see ``screen_relative``
-      * size (px or %) [optional]: width-height dimension of the
-        frame, see ``screen_relative``
-      * screen_relative (bool) [optional]: set to ``True`` to give
-        ``pos`` and ``size`` as a % of the screen size, or ``False``
-        to give then as pixels
-
-    Kwargs:
-      * Will be passed to the optional custom methods
-
-    Raises:
-      N/A
-    """.format(core.INITMETHOD, core.UPDATEMETHOD)
-    def __init__(self, daddy, name, freq_up, pos=(50, 50), size=(400, 400),
+    def __init__(self, name, freq_up, pos=(50, 50), size=(400, 400),
                  screen_relative=False, **kwargs):
+        """
+        Initialises a frame, a base-class used to contain a e.g.
+        :py:class:`Graph` or :py:class:`Text`.
+
+        [Optional]
+          * Create a custom method ``core.INITMETHOD`` to add to the
+            initialization of the frame.
+          * Create a custom method ``core.UPDATEMETHOD`` to add code at
+            the updating of the frame.
+
+        Args:
+          * name (str): the frame name
+          * freq_up (float or None): the frequency of update of the
+            frame, between 1e-3 and 1e3 Hz, or ``None`` for no update
+          * pos (px or %) [optional]: left-top corner position of the
+            frame, see ``screen_relative``
+          * size (px or %) [optional]: width-height dimension of the
+            frame, see ``screen_relative``
+          * screen_relative (bool) [optional]: set to ``True`` to give
+            ``pos`` and ``size`` as a % of the screen size, or ``False``
+            to give then as pixels
+
+        Kwargs:
+          * Will be passed to the optional custom methods
+        """
         # save input for reinit
-        kwargs['daddy'] = daddy
         kwargs['name'] = name
         kwargs['freq_up'] = freq_up
         kwargs['pos'] = pos
         kwargs['size'] = size
         kwargs['screen_relative'] = screen_relative
         self._kwargs = kwargs
-        # list this frame
-        daddy._frames.append(self)
         # main simu not running
         self._mummy_running = False
         self._init_frame(**self._kwargs)
@@ -102,8 +94,7 @@ class Frame(object):
     @property
     def visible(self):
         """
-        Returns ``True`` if the frame has not been closed
-        Read-only.
+        Returns ``True`` if the frame has not been closed. Read-only.
         """
         return self._visible
 
@@ -116,8 +107,7 @@ class Frame(object):
     @property
     def typ(self):
         """
-        Returns the type of the frame, e.g. ``Graph``.
-        Read-only.
+        Returns the type of the frame, e.g. ``Graph``. Read-only.
         """
         return "_{}".format(self.__class__.__name__.lower())
 
@@ -130,7 +120,7 @@ class Frame(object):
         Re-initializes the frame, i.e. closes the current frame if
         necessary and creates a new one. Uses the parameters of
         initialization by default or anything provided through kwargs.
-        See :class:`Frame` for the description of input parameters.
+        See class :py:class:`Frame` for the description of input parameters.
         """
         try:
             self.exit()

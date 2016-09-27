@@ -33,14 +33,14 @@ from .frame import Frame
 __all__ = ['Text']
 
 
-class Text(Frame):
+class Image(Frame):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, background="black",
                  foreground='green', rev=True, font=("consolas", 11),
                  mark_line=True, mark_fmt='%H:%M:%S > ', scrollbar=True,
                  **kwargs):
         """
-        Initialises a text-frame. Use :py:func:`Text.add_text` to add text to it.
+        Initialises an image-frame.
 
         [Optional]
           * Create a custom method ``core.INITMETHOD`` to add to the
@@ -59,20 +59,8 @@ class Text(Frame):
           * screen_relative (bool) [optional]: set to ``True`` to give
             ``pos`` and ``size`` as a % of the screen size, or ``False``
             to give then as pixels
-          * background (color) [optional]: background color of the frame
-          * foreground (color) [optional]: text color of the frame
-          * rev (bool) [optional]: if ``True``, a new line will be added on
-            the top of the text
-          * font (tuple (font, size)) [optional]: the font of the text
-          * mark_line (bool) [optional]: if ``True``, each line will be
-            prepended using the ``Text.mark_fmt`` format
-          * mark_fmt (str) [optional]: ``time.strftime`` format to be used
-            for (optionally) prepending each text added to the frame
-          * scrollbar (bool) [optional]: if ``True``, a Y-scrollbar is added
 
         Kwargs:
-          * wrap (str): wrap mechanism (default 'word')
-          * undo (bool): authorized undoing if ``True``
           * Any parameters accepted by ``tkinter.Text`` (non-abbreviated)
           * Will be passed to the optional custom methods
         """
@@ -82,13 +70,6 @@ class Text(Frame):
         kwargs['pos'] = pos
         kwargs['size'] = size
         kwargs['screen_relative'] = screen_relative
-        kwargs['background'] = background
-        kwargs['foreground'] = foreground
-        kwargs['rev'] = rev
-        kwargs['font'] = font
-        kwargs['mark_line'] = mark_line
-        kwargs['mark_fmt'] = mark_fmt
-        kwargs['scrollbar'] = scrollbar
         self._kwargs = kwargs
         # call mummy init
         super(Text, self).__init__(**self._kwargs)
@@ -99,22 +80,28 @@ class Text(Frame):
         """
         Separate function from __init__ for re-initialization purpose
         """
-        self._lines_to_insert = []
-        self._isempty = True
-        self.rev = bool(kwargs.pop('rev'))
-        self.mark_line = bool(kwargs.pop('mark_line'))
-        self.mark_fmt = kwargs.pop('mark_fmt')
-        self._text = tkinter.Text(master=self._window, **core.tkkwargs(kwargs))
-        self._text.config(font=kwargs.pop('font'),
-                          undo=kwargs.pop('undo', True),
-                          wrap=kwargs.pop('wrap', 'word'))
-        if kwargs.pop('scrollbar'):
-            scrollbar = tkinter.Scrollbar(self._text)
-            scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-            self._text.config(yscrollcommand=scrollbar.set)
-            scrollbar.config(command=self._text.yview)
-        self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)            
-        # call the user's init if existing
+        self.xnptsmax = int(kwargs.pop('xnptsmax'))
+        self.xylim = tuple(kwargs.pop('xylim')[:4])
+        self.axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
+        self.xnpts = int(kwargs.pop('xnpts'))
+        axrect = tuple(kwargs.pop('axrect')[:4])
+        self._fig = core.mat.figure.Figure()
+        self.ax = self._fig.add_axes(axrect[:2] + (axrect[2]-axrect[0],
+                                                   axrect[3]-axrect[1]),
+                                     **core.matkwargs(kwargs))
+        self._canvas = FigureCanvasTkAgg(self._fig, master=self._window)
+        self._canvas.show()
+        self._canvas.get_tk_widget().pack(side=tkinter.TOP,
+                                          fill=tkinter.BOTH,
+                                          expand=True)
+        self._canvas._tkcanvas.pack(side=tkinter.TOP,
+                                    fill=tkinter.BOTH,
+                                    expand=True)
+        self.ax.set_axis_bgcolor(kwargs.pop('bgcol'))
+        grid = kwargs.pop('grid')
+        if grid not in [None, False]:
+            self.ax.grid(color=grid, lw=1)
+        self.ax.plot(0, 0, kwargs.pop('fmt'), **core.matkwargs(kwargs))
         core.callit(self, core.PREUPDATEMETHOD)
         core.callit(self, core.INITMETHOD, **kwargs)
 
@@ -123,7 +110,7 @@ class Text(Frame):
         Re-initializes the frame, i.e. closes the current frame if
         necessary and creates a new one. Uses the parameters of
         initialization by default or anything provided through kwargs.
-        See class :py:class:`Text` for the description of input parameters.
+        See :class:`Text` for the description of input parameters.
         """
         # updates with new reinit value if specified
         self._kwargs.update(kwargs)
@@ -152,10 +139,10 @@ class Text(Frame):
         """
         Adds the text ``txt`` to the frame, on a newline if ``newline``
         is ``True``.
-        The new ``txt`` is prepended using the format in ``Text.mark_fmt``
-        if ``mark_line`` is ``True``, default is ``Text.mark_line``.
+        The new ``txt`` is prepended using the format in ``self.mark_fmt``
+        if ``mark_line`` is ``True``, default is ``self.mark_line``.
         It is added at the end of the frame text if ``rev`` is ``True``,
-        default is not(``Text.rev``).
+        default is ``not self.rev``.
         """
         if not self.visible:
             return

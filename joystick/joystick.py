@@ -33,20 +33,20 @@ __all__ = ['Joystick']
 
 
 class Joystick(object):
-    """
-    Main class to be wrapped (see ./joystick/example.py)
-
-    [Optional]
-      * Create a custom method ``{0}`` to add to the initialization of
-        the class.
-
-    Kwargs:
-      * Will be passed to the optional custom methods
-
-    Raises:
-      N/A
-    """.format(core.INITMETHOD)
     def __init__(self, **kwargs):
+        """
+        Main class to be wrapped (see ./joystick/example.py)
+
+        [Optional]
+          * Create a custom method ``core.INITMETHOD`` to add to the initialization of
+            the class.
+
+        Kwargs:
+          * Will be passed to the optional custom methods
+
+        Raises:
+          N/A
+        """
         self._dead = False
         self._frames = []
         self._running = False
@@ -73,6 +73,15 @@ class Joystick(object):
             for item in self._frames:
                 if item.visible:
                     item.start()
+
+    def add_frame(self, frame):
+        """
+        Adds a frame to the simulation. Use it as:
+
+        >>> self.mygraph = self.add_frame(frame)
+        """
+        self._frames.append(frame)
+        return frame
 
     @classmethod
     def _get_infinite_loop_fcts(self):

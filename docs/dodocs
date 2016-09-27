@@ -12,7 +12,7 @@ else
 fi
 
 
-sphinx-apidoc -F -o ./ ../joystick/
+sphinx-apidoc -o ./ ../joystick/ ../joystick/test/ ../joystick/example*
 echo ""
 echo "Created new docs (.rst) files"
 
