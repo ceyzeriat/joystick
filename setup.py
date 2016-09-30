@@ -32,7 +32,7 @@ setup(
                     + "Changelog\n"
                     + "---------\n\n"
                     + open("HISTORY.rst").read(),
-    package_data = {"": ["LICENSE", "AUTHORS.rst", "HISTORY.rst"]},
+    package_data = {"": ["LICENSE", "AUTHORS.rst", "HISTORY.rst", "README.rst"]},
     include_package_data = True,
     install_requires = [],
     download_url = 'https://github.com/ceyzeriat/joystick/tree/master/dist',
