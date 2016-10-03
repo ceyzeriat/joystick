@@ -140,8 +140,8 @@ def callit(self, methodstr, *args, **kwargs):
 
 def add_datapoint(ar, ar2, xnptsmax=None):
     """
-    Concatenates ar2 to ar (either int/float or 1-dim vectors)
-    Optionally, 
+    Concatenates ar2 at the end of ar. ar2 can either be a int/float or
+    1-dim vectors. Cuts the vector to xnptsmax elements.
     """
     if xnptsmax is None:
         return np.r_[ar, ar2]
