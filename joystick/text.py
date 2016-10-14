@@ -146,6 +146,8 @@ class Text(Frame):
                 self._isempty = False
             self._text.insert(self._lines_to_insert[0][0],
                               self._lines_to_insert[0][1])
+            if not self.rev:
+                self._text.see(tkinter.END)
             self._lines_to_insert.pop(0)
 
     def add_text(self, txt="", end=None, newline=True, mark_line=None):

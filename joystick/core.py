@@ -27,7 +27,7 @@
 import matplotlib as mat
 mat.use('TkAgg')
 from matplotlib import lines
-from matplotlib.backends import backend_tkagg
+#from matplotlib.backends import backend_tkagg
 import matplotlib.cm
 from matplotlib.pyplot import Normalize as matplotlibpyplotNormalize
 try:
@@ -50,8 +50,7 @@ PREUPDATEMETHOD = "_pre_update"
 UPDATEGUIMETHOD = "show"
 # nombre de pts gardés en mémoire en X
 
-doc_cst = {'INITMETHOD': INITMETHOD,
-           'UPDATEMETHOD': UPDATEMETHOD}
+# for the documentation
 __doc__ = """Here are some useful constants:
 
              .. py:data:: INITMETHOD
