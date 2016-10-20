@@ -38,8 +38,8 @@ class Joystick(object):
         Main class to be wrapped (see ./joystick/example.py)
 
         [Optional]
-          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
-            initialization of the frame.
+          * Create a custom method decorated with :py:data:`~joystick.deco.deco_before` or
+           :py:data:`~joystick.deco.deco_after` to add to the initialization of the frame.
 
         Kwargs:
           * Will be passed to the optional custom methods
@@ -47,10 +47,13 @@ class Joystick(object):
         Raises:
           N/A
         """
+        before, after = core.extract_callit(self, 'init')
+        core.callmthd(self, before, **kwargs)
         self._dead = False
         self._frames = []
         self._running = False
-        core.callit(self, core.INITMETHOD, **kwargs)
+        # core.INITMETHOD left for backward compatibility
+        core.callmthd(self, after + [core.INITMETHOD], **kwargs)
 
     @property
     def running(self):
@@ -64,23 +67,29 @@ class Joystick(object):
     def running(self, value):
         if self._dead:
             return
-        self._running = bool(value)
+        if value:
+            self.start()
+        else:
+            self.stop()
+
+    def _push_status_to_all_frames(self):
+        """
+        Push running status to all frames
+        """
         for item in self._frames:
             item._mummy_running = self._running
-        if self._running:
-            for item in self._get_infinite_loop_fcts():
-                core.callit(self, item)
-            for item in self._frames:
-                if item.visible:
-                    item.start()
 
-    def add_frame(self, frame):
+
+    def add_frame(self, frame, **kwargs):
         """
         Adds a frame to the simulation. Use it as:
 
         >>> self.mygraph = self.add_frame(frame)
         """
+        before, after = core.extract_callit(self, 'add_frame')
+        core.callmthd(self, before, **kwargs)
         self._frames.append(frame)
+        core.callmthd(self, after, **kwargs)
         return frame
 
     @classmethod
@@ -93,11 +102,19 @@ class Joystick(object):
             return self._infinite_loop.fcts
         return []
 
-    def start(self):
+    def start(self, **kwargs):
         """
-        Starts the simulation
+        Starts the simulation if not already running nor exited
+        Starts each individual frame (calls `~joystick.Joystick.start_frames`)
         """
-        self.running = True
+        if self._dead or self._running:
+            return
+        self._running = True
+        before, after = core.extract_callit(self, 'start')
+        core.callmthd(self, before + self._get_infinite_loop_fcts(), **kwargs)
+        self._push_status_to_all_frames()
+        self.start_frames()
+        core.callmthd(self, after, **kwargs)
 
     def start_frames(self):
         """
@@ -107,11 +124,20 @@ class Joystick(object):
         for item in self._frames:
             item.start()
 
-    def stop(self):
+    def stop(self, **kwargs):
         """
-        Stops the simulation and all frames
+        Stops the simulation if not exited nor already stopped
+        Does not individually stop each frames, although frames will
+        stop updating given that the simulation is no longer running;
+        i.e. does not call `~joystick.Joystick.start_frames`.
         """
-        self.running = False
+        if self._dead or not self._running:
+            return
+        self._running = False
+        before, after = core.extract_callit(self, 'stop')
+        core.callmthd(self, before, **kwargs)
+        self._push_status_to_all_frames()
+        core.callmthd(self, after, **kwargs)
 
     def stop_frames(self):
         """
@@ -121,13 +147,16 @@ class Joystick(object):
         for item in self._frames:
             item.stop()
 
-    def exit(self):
+    def exit(self, **kwargs):
         """
         Terminates the simulation
         """
+        before, after = core.extract_callit(self, 'exit')
+        core.callmthd(self, before, **kwargs)
         for item in self._frames:
             if item.visible:
                 item.exit()
         self.stop()
         self._dead = True
         time.sleep(0.2)
+        core.callmthd(self, after, **kwargs)

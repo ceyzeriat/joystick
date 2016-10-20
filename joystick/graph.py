@@ -131,8 +131,8 @@ class Graph(Frame):
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
         self.ax.plot(0, 0, kwargs.pop('fmt'), **core.matkwargs(kwargs))
-        core.callit(self, core.PREUPDATEMETHOD)
-        core.callit(self, core.INITMETHOD, **kwargs)
+        core.callmthd(self, core.PREUPDATEMETHOD)
+        core.callmthd(self, core.INITMETHOD, **kwargs)
 
     def reinit(self, **kwargs):
         """

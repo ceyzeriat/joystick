@@ -48,7 +48,8 @@ UPDATEMETHOD = "_update"
 PREUPDATEMETHOD = "_pre_update"
 # la méthode de mise à jour de la GUI
 UPDATEGUIMETHOD = "show"
-# nombre de pts gardés en mémoire en X
+
+CALLITFCT = "_callit"
 
 # for the documentation
 __doc__ = """Here are some useful constants:
@@ -128,13 +129,41 @@ def extract_kwargs(kwargs, ll):
     return dic
 
 
-def callit(self, methodstr, *args, **kwargs):
+def callmthd(self, methodstr, *args, **kwargs):
     """
     Calls self.'methodstr' after having tests that it exists and that
     it is callable
     """
-    if callable(getattr(self, methodstr, None)):
-        return getattr(self, methodstr)(*args, **kwargs)
+    if isinstance(methodstr, (tuple, list)):
+        ret = []
+        for item in methodstr:
+            if callable(getattr(self, item, None)):
+                ret.append(getattr(self, item)(*args, **kwargs))
+        return ret
+    else:
+        if callable(getattr(self, methodstr, None)):
+            return getattr(self, methodstr)(*args, **kwargs)
+
+
+def extract_callit(obj, fct):
+    """
+    Give an object and an expected method name fct.
+    Return a (list_before, list_after) containing all functions
+    that match obj._callit.'before_fct' and
+    obj._callit.'after_fct'.
+    Useful for callit decorator
+    """
+    after = []
+    before = []
+    for k, v in getattr(obj, CALLITFCT, {}).__dict__.items():
+        if fct.lower() != k[k.find('_')+1:].lower():
+            continue
+        prefix = k.split('_')[0].lower()
+        if prefix == 'after':
+            after += v
+        elif prefix == 'before':
+            before += v
+    return before, after
 
 
 def add_datapoint(ar, ar2, xnptsmax=None):

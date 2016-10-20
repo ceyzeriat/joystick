@@ -30,12 +30,14 @@ from functools import wraps
 
 from . import core
 
-__all__ = ['deco_infinite_loop']
+__all__ = ['deco_infinite_loop', 'deco_thread_it', 'deco_callit']
+
+POSSIBLE_METH = ['init', 'start', 'stop', 'exit', 'add_frame']
 
 def deco_infinite_loop(wait_time=0.5):
     """
-    This decorator creates a daemon-thread to call a decotared
-    joystick method in an infinite loop every wait_time seconds, as
+    This decorator creates a daemon-thread to call the decotared
+    joystick method in an infinite loop every `wait_time` seconds, as
     long as the joystick.running attribute is True, or until the end
     of the universe, whichever is first.
     
@@ -57,7 +59,7 @@ def deco_infinite_loop(wait_time=0.5):
     It then can be used normally:
 
     >>> @_infinite_loop(wait_time=0.5)  # in sec
-    >>> def repetitive_task():
+    >>> def repetitive_task(self, ...):
     >>>     print("Next time I'm done I swear.")
     """
     # just a layer to get a memory copy of the decorator at run-time
@@ -84,3 +86,72 @@ def deco_infinite_loop(wait_time=0.5):
             return func_wrapper
         return func_decorator
     return infinite_loop_static
+
+
+def deco_thread_it(func):
+    """
+    This decorator creates a daemon-thread to wrap the decotared
+    function into a separate thread that is started at the call
+    of the function (not with simulation start)
+
+    >>> @joystick.deco_thread_it
+    >>> def wait_and_print(txt, wait_time=0.5):
+    >>>     time.sleep(wait_time)
+    >>>     print("Hey, btw: {}".format(txt))
+    """
+    @wraps(func)
+    def func_wrapper(*args, **kwargs):
+        # the wrapper, to get pretty docstrings
+        # register the Thread and start it
+        loopy = Thread(target=func, args=args, kwargs=kwargs)
+        loopy.daemon = True
+        loopy.start()
+    return func_wrapper
+
+
+def deco_callit(when='after', fct="init"):
+    """
+    This decorator, when applied to a function `f`, registers it as to
+    called before the joystick method given as input parameter, e.g.
+    `init`.
+    
+    This is a self-aware decorator, recording all function names
+    decorated with itself, such that all threads can be launched
+    simultaneously with the joystick.start() method.
+
+    However, it must be initialized at run-time before use:
+
+    >>> class yuhu(joystick.Joystick):
+    >>>     _callit = joystick.deco_callit()
+    >>>     ...
+    
+    (the reason is that it must get a memory copy of the decorator
+     function in order to record the decorated functions in the
+     desired scope, not in the pakage import scope.
+     In short, just initilize it as above and it will work)
+
+    It then can be used normally:
+
+    >>> @_callit('before', 'exit')
+    >>> def call_before_exit(txt):
+    >>>     print("OMG, you're about to exit")
+    """
+    # just a layer to get a memory copy of the decorator at run-time
+    def deco_callit_static(when=when, fct=fct):
+        # the top-level decorator, with defaulted fct
+        fct = fct.lower()
+        if fct not in POSSIBLE_METH:
+            raise ValueError("'fct' parameter shall be in {}".format(POSSIBLE_METH))
+        after = str(when).lower()[0] == 'a'
+        def func_decorator(func):
+            # the actual decorator
+            @wraps(func)
+            def func_wrapper(self, **kwargs):
+                # the wrapper, to get pretty docstrings
+                func(self, **kwargs)  # finally calling some stuff
+            # at class-definition, this adds the function name in the
+            # top-level decorator
+            core.append(deco_callit_static, ("after" if after else "before") + "_" + fct, getattr(func, 'func_name', getattr(func, '__name__', None)))
+            return func_wrapper
+        return func_decorator
+    return deco_callit_static

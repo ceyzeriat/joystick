@@ -31,16 +31,24 @@ import time
 
 
 class test(jk.Joystick):
-   # initialize the infinite loop decorator
+   # initialize the infinite loop and callit decorator
     _infinite_loop = jk.deco_infinite_loop()
+    _callit = jk.deco_callit()
 
-    def _init(self, *args, **kwargs):
+    @_callit('after', 'init')
+    def _init_data(self, *args, **kwargs):
         """
-        Function called at initialization, don't bother why for now
+        Function called (first) at initialization, thanks to the decorator
         """
         self._t0 = time.time()  # initialize time
         self.xdata = np.array([self._t0])  # time x-axis
         self.ydata = np.array([0.0])  # fake data y-axis
+
+    @_callit('after', 'init')
+    def _build_frames(self, *args, **kwargs):
+        """
+        Function called (second) at initialization, thanks to the decorator
+        """
         # create a graph frame
         self.mygraph = self.add_frame(
                        jk.Graph(name="test", size=(500, 500), pos=(50, 50),
@@ -50,10 +58,11 @@ class test(jk.Joystick):
         self.mytext = self.add_frame(
                       jk.Text(name="Y-overflow", size=(500, 250),
                               pos=(600, 50), freq_up=2))
+        # create an image frame
         self.myimg = self.add_frame(
-                      jk.Image(name="IMG", size=(0.5, 0.5), pos=(0.2, 0.2),
-                               screen_relative=True, axrect=(0,0,1,1), freq_up=3,
-                               cm_bounds = (0, 1)))
+                      jk.Image(name="IMG", size=(150, 150), pos=(700, 350),
+                               screen_relative=False, axrect=(0,0,1,1),
+                               freq_up=3, cm_bounds = (0, 1)))
 
     @_infinite_loop(wait_time=0.2)
     def _generate_fake_data(self):  # function looped every 0.2 second

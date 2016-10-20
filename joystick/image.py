@@ -116,8 +116,8 @@ class Image(Frame):
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
         self.reset_image(data=[[0, 0],[0, 0]], **kwargs)
-        core.callit(self, core.PREUPDATEMETHOD)
-        core.callit(self, core.INITMETHOD, **kwargs)
+        core.callmthd(self, core.PREUPDATEMETHOD)
+        core.callmthd(self, core.INITMETHOD, **kwargs)
 
     @property
     def cmap(self):

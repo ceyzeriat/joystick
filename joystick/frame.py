@@ -89,7 +89,7 @@ class Frame(object):
             pos = tuple(np.round(np.array(pos) * (w, h)).astype(int))
             size = tuple(np.round(np.array(size) * (w, h)).astype(int))
         self._window.geometry("{}x{}+{}+{}".format(*(size + pos)))
-        core.callit(self, core.INITMETHOD, **kwargs)
+        core.callmthd(self, core.INITMETHOD, **kwargs)
 
     @property
     def visible(self):
@@ -167,8 +167,8 @@ class Frame(object):
         Performs the loop-calling job
         """
         if self._mummy_running and self.running and self._freq_up is not None:
-            core.callit(self, core.PREUPDATEMETHOD)
-            core.callit(self, core.UPDATEMETHOD)
+            core.callmthd(self, core.PREUPDATEMETHOD)
+            core.callmthd(self, core.UPDATEMETHOD)
             self.show()
             self._window.after(int(1000./self.freq_up), self._update_loop)
 

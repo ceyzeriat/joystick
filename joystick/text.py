@@ -115,8 +115,8 @@ class Text(Frame):
             scrollbar.config(command=self._text.yview)
         self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)            
         # call the user's init if existing
-        core.callit(self, core.PREUPDATEMETHOD)
-        core.callit(self, core.INITMETHOD, **kwargs)
+        core.callmthd(self, core.PREUPDATEMETHOD)
+        core.callmthd(self, core.INITMETHOD, **kwargs)
 
     def reinit(self, **kwargs):
         """
@@ -144,13 +144,13 @@ class Text(Frame):
         for i in range(n):
             if self._isempty:
                 self._isempty = False
-            self._text.insert(self._lines_to_insert[0][0],
-                              self._lines_to_insert[0][1])
+            self._text.insert(*self._lines_to_insert[0])
             if not self.rev:
                 self._text.see(tkinter.END)
             self._lines_to_insert.pop(0)
 
-    def add_text(self, txt="", end=None, newline=True, mark_line=None):
+    def add_text(self, txt="", end=None, newline=True, mark_line=None,
+                 encoding="utf-8"):
         """
         Adds the text ``txt`` to the frame, on a newline if ``newline``
         is ``True``.
@@ -161,20 +161,19 @@ class Text(Frame):
         """
         if not self.visible:
             return
-        mark_line = bool(mark_line) \
-                        if mark_line is not None else self.mark_line
+        mark_line = self.mark_line if mark_line is None \
+                        else bool(mark_line)
         if mark_line:
             addon = time.strftime(self.mark_fmt)
         in_the_end = bool(end) if end is not None else not self.rev
         nl_f = "\n" if in_the_end and not self._isempty and newline else ""
         nl_e = "\n" if not in_the_end and not self._isempty and newline else ""
-        #self._text._lines_to_
         self._lines_to_insert.append([
             tkinter.END if in_the_end else '1.0',
             "{}{}{}{}".format(nl_f,
-                                            addon if mark_line else "",
-                                            txt,
-                                            nl_e)])
+                              addon if mark_line else "",
+                              txt.encode(encoding),
+                              nl_e)])
 
     def clear(self):
         """
