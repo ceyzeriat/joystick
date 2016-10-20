@@ -100,7 +100,7 @@ class test(Joystick):
 class test2(Joystick):
    # initialize the infinite loop decorator
     _infinite_loop = deco_infinite_loop()
-    _callit = jk.deco_callit()
+    _callit = deco_callit()
 
     @_callit('after', 'init')
     def _initialization(self, *args, **kwargs):
