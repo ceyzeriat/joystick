@@ -34,14 +34,22 @@ Straight to the point: check-out this example. It generates fake random data (yd
     class test(jk.Joystick):
        # initialize the infinite loop decorator
         _infinite_loop = jk.deco_infinite_loop()
+        _callit = jk.deco_callit()
 
-        def _init(self, *args, **kwargs):
+        @_callit('after', 'init')
+        def _init_data(self, *args, **kwargs):
             """
-            Function called at initialization, don't bother why for now
+            Function called (first) at initialization, thanks to the decorator
             """
             self._t0 = time.time()  # initialize time
             self.xdata = np.array([self._t0])  # time x-axis
             self.ydata = np.array([0.0])  # fake data y-axis
+
+        @_callit('after', 'init')
+        def _build_frames(self, *args, **kwargs):
+            """
+            Function called (second) at initialization, thanks to the decorator
+            """
             # create a graph frame
             self.mygraph = self.add_frame(
                        jk.Graph(name="test", size=(500, 500), pos=(50, 50),

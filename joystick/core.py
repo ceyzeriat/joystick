@@ -42,7 +42,10 @@ __all__ = []
 
 
 # la méthode d'initialisation des graphes
+# DEPRECATED
 INITMETHOD = "_init"
+
+
 # la méthode de mise à jour des graphes
 UPDATEMETHOD = "_update"
 PREUPDATEMETHOD = "_pre_update"
@@ -53,10 +56,6 @@ CALLITFCT = "_callit"
 
 # for the documentation
 __doc__ = """Here are some useful constants:
-
-             .. py:data:: INITMETHOD
-
-                = '_init'
 
              .. py:data:: UPDATEMETHOD
 
@@ -155,14 +154,15 @@ def extract_callit(obj, fct):
     """
     after = []
     before = []
-    for k, v in getattr(obj, CALLITFCT, {}).__dict__.items():
-        if fct.lower() != k[k.find('_')+1:].lower():
-            continue
-        prefix = k.split('_')[0].lower()
-        if prefix == 'after':
-            after += v
-        elif prefix == 'before':
-            before += v
+    if hasattr(obj, CALLITFCT):
+        for k, v in getattr(obj, CALLITFCT).__dict__.items():
+            if fct.lower() != k[k.find('_')+1:].lower():
+                continue
+            prefix = k.split('_')[0].lower()
+            if prefix == 'after':
+                after += v
+            elif prefix == 'before':
+                before += v
     return before, after
 
 
