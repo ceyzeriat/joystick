@@ -31,11 +31,11 @@ import time
 
 
 class test(jk.Joystick):
-   # initialize the infinite loop and callit decorator
+    # initialize the infinite loop and callit decorators
     _infinite_loop = jk.deco_infinite_loop()
     _callit = jk.deco_callit()
 
-    @_callit('after', 'init')
+    @_callit('before', 'init')
     def _init_data(self, *args, **kwargs):
         """
         Function called (first) at initialization, thanks to the decorator
@@ -60,9 +60,13 @@ class test(jk.Joystick):
                               pos=(600, 50), freq_up=2))
         # create an image frame
         self.myimg = self.add_frame(
-                      jk.Image(name="IMG", size=(150, 150), pos=(700, 350),
-                               screen_relative=False, axrect=(0,0,1,1),
+                      jk.Image(name="IMG", size=(0.1, 0.1), pos=(0.3, 0.3),
+                               screen_relative=True, axrect=(0,0,1,1),
                                freq_up=3, cm_bounds = (0, 1)))
+    
+    @_callit('before', 'exit')
+    def exit_warning(self):
+        print("OMG, you're about to exit")
 
     @_infinite_loop(wait_time=0.2)
     def _generate_fake_data(self):  # function looped every 0.2 second

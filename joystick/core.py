@@ -45,21 +45,27 @@ __all__ = []
 # DEPRECATED
 INITMETHOD = "_init"
 
+# available methods for callit decoration in Joystick class
+CALLIT_JOYSTICK_METH = ['init', 'start', 'stop', 'exit', 'add_frame']
+
+CALLIT_FRAME_METH = ['init', 'start', 'stop', 'exit', 'update']
 
 # la méthode de mise à jour des graphes
 UPDATEMETHOD = "_update"
-PREUPDATEMETHOD = "_pre_update"
-# la méthode de mise à jour de la GUI
-UPDATEGUIMETHOD = "show"
 
-CALLITFCT = "_callit"
+CALLITDECO = "_callit"
+INFINITELOOPDECO = "_infinite_loop"
 
 # for the documentation
 __doc__ = """Here are some useful constants:
 
-             .. py:data:: UPDATEMETHOD
+             .. py:data:: CALLIT_JOYSTICK_METH
 
-                = '_update'
+                = ['init', 'start', 'stop', 'exit', 'add_frame']
+
+             .. py:data:: CALLIT_FRAME_METH
+
+                = ['init', 'start', 'stop', 'exit', 'update']
           """
 
 
@@ -128,20 +134,20 @@ def extract_kwargs(kwargs, ll):
     return dic
 
 
-def callmthd(self, methodstr, *args, **kwargs):
+def callmthd(obj, methodstr, *args, **kwargs):
     """
-    Calls self.'methodstr' after having tests that it exists and that
+    Calls obj.'methodstr' after having tests that it exists and that
     it is callable
     """
     if isinstance(methodstr, (tuple, list)):
         ret = []
         for item in methodstr:
-            if callable(getattr(self, item, None)):
-                ret.append(getattr(self, item)(*args, **kwargs))
+            if callable(getattr(obj, item, None)):
+                ret.append(getattr(obj, item)(*args, **kwargs))
         return ret
     else:
-        if callable(getattr(self, methodstr, None)):
-            return getattr(self, methodstr)(*args, **kwargs)
+        if callable(getattr(obj, methodstr, None)):
+            return getattr(obj, methodstr)(*args, **kwargs)
 
 
 def extract_callit(obj, fct):
@@ -154,8 +160,8 @@ def extract_callit(obj, fct):
     """
     after = []
     before = []
-    if hasattr(obj, CALLITFCT):
-        for k, v in getattr(obj, CALLITFCT).__dict__.items():
+    if hasattr(obj, CALLITDECO):
+        for k, v in getattr(obj, CALLITDECO).__dict__.items():
             if fct.lower() != k[k.find('_')+1:].lower():
                 continue
             prefix = k.split('_')[0].lower()
@@ -164,6 +170,16 @@ def extract_callit(obj, fct):
             elif prefix == 'before':
                 before += v
     return before, after
+
+
+def get_infinite_loop_fcts(obj):
+        """
+        Returns a list of all functions decorated with the 
+        infinite_loop decorator
+        """
+        if hasattr(obj, INFINITELOOPDECO):
+            return getattr(obj, INFINITELOOPDECO).fcts
+        return []
 
 
 def add_datapoint(ar, ar2, xnptsmax=None):
@@ -184,15 +200,15 @@ def timestamp():
     return time.time()
 
 
-def append(self, attr, v):
+def append(obj, attr, v):
     """
-    Appends v to self.'attr' (creates an empty list if it does not
+    Appends v to obj.'attr' (creates an empty list if it does not
         exist yet)
     """
-    if hasattr(self, attr):
-        getattr(self, attr).append(v)
+    if hasattr(obj, attr):
+        getattr(obj, attr).append(v)
     else:
-        setattr(self, attr, [v])
+        setattr(obj, attr, [v])
 
 
 class font:

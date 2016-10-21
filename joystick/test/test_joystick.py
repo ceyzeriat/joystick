@@ -157,12 +157,12 @@ class test2(Joystick):
 
 
 
-def testbackward_create():
+def testdeprecated_create():
     t = test()
     time.sleep(1)
     t.exit()
 
-def testbackward_play():
+def testdeprecated_play():
     t = test()
     t.start()
     time.sleep(1)

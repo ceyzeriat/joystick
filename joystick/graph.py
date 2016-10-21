@@ -46,12 +46,6 @@ class Graph(Frame):
         graph, or :py:func:`~joystick.graphGraph.set_xylim` and :py:func:`~joystick.graphGraph.get_xylim` to
         get and set the axes limits.
 
-        [Optional]
-          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
-            initialization of the frame.
-          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD` to add code at
-            the updating of the frame.
-
         Args:
           * name (str): the frame name
           * freq_up (float or None): the frequency of update of the frame,
@@ -102,6 +96,7 @@ class Graph(Frame):
         self._kwargs = kwargs
         # call mummy init
         super(Graph, self).__init__(**self._kwargs)
+        self._preupdate_fcts += ['_scale_axes']
         # call ya own init
         self._init_base(**self._kwargs)
 
@@ -109,6 +104,8 @@ class Graph(Frame):
         """
         Separate function from __init__ for re-initialization purpose
         """
+        before, after = self._extract_callit('init')
+        self._callmthd(before, **kwargs)
         self.xnptsmax = int(kwargs.pop('xnptsmax'))
         self.xylim = tuple(kwargs.pop('xylim')[:4])
         self.axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
@@ -131,8 +128,16 @@ class Graph(Frame):
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
         self.ax.plot(0, 0, kwargs.pop('fmt'), **core.matkwargs(kwargs))
-        core.callmthd(self, core.PREUPDATEMETHOD)
-        core.callmthd(self, core.INITMETHOD, **kwargs)
+        self._scale_axes()
+        self._callmthd(after, **kwargs)
+        # core.INITMETHOD left for backward compatibility
+        if core.INITMETHOD not in after \
+            and core.INITMETHOD not in before \
+            and hasattr(self, core.INITMETHOD):
+            print("DEPRECATION WARNING: You should add the decorator " \
+                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
+                  " ".format(core.INITMETHOD))
+            self._callmthd(core.INITMETHOD, **kwargs)
 
     def reinit(self, **kwargs):
         """
@@ -230,13 +235,15 @@ class Graph(Frame):
         if self.visible:
             return self.ax.get_xlim() + self.ax.get_ylim()
 
-    def _pre_update(self):
+    def _scale_axes(self):
         """
         Does the axes scaling
         """
-        x, y = self.get_xydata()
         # None means recalculate the bound
         xmin, xmax, ymin, ymax = self.xylim
+        if xmin is None and xmax is None and ymin is None and ymax is None:
+            return
+        x, y = self.get_xydata()
         xmin_f = x.min() if xmin is None else xmin
         xmax_f = max(x.max(), xmin_f+self._minmini) if xmax is None else xmax
         ymin_f = y.min() if ymin is None else ymin

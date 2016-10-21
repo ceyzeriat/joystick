@@ -32,7 +32,6 @@ from . import core
 
 __all__ = ['deco_infinite_loop', 'deco_thread_it', 'deco_callit']
 
-POSSIBLE_METH = ['init', 'start', 'stop', 'exit', 'add_frame']
 
 def deco_infinite_loop(wait_time=0.5):
     """
@@ -56,7 +55,7 @@ def deco_infinite_loop(wait_time=0.5):
      desired scope, not in the pakage import scope.
      In short, just initilize it as above and it will work)
 
-    It then can be used normally:
+    It then can be used normally (within a class definition):
 
     >>> @_infinite_loop(wait_time=0.5)  # in sec
     >>> def repetitive_task(self, ...):
@@ -82,7 +81,11 @@ def deco_infinite_loop(wait_time=0.5):
                 loopy.start()
             # at class-definition, this adds the function name in the
             # top-level decorator
-            core.append(infinite_loop_static, 'fcts', getattr(func, 'func_name', getattr(func, '__name__', None)))
+            core.append(infinite_loop_static,
+                        'fcts',
+                        getattr(func,
+                                'func_name',
+                                getattr(func, '__name__', None)))
             return func_wrapper
         return func_decorator
     return infinite_loop_static
@@ -112,7 +115,8 @@ def deco_thread_it(func):
 def deco_callit(when='after', fct="init"):
     """
     This decorator, when applied to a function `f`, registers it as to
-    called before the joystick method given as input parameter, e.g.
+    be called ``when`` ('before' or 'after') the method ``fct``.
+    :py:data:`~joystick.core.INITMETHOD`
     `init`.
     
     This is a self-aware decorator, recording all function names
@@ -130,18 +134,19 @@ def deco_callit(when='after', fct="init"):
      desired scope, not in the pakage import scope.
      In short, just initilize it as above and it will work)
 
-    It then can be used normally:
+    It then can be used normally (within a class definition):
 
     >>> @_callit('before', 'exit')
-    >>> def call_before_exit(txt):
+    >>> def exit_warning(self):
     >>>     print("OMG, you're about to exit")
     """
     # just a layer to get a memory copy of the decorator at run-time
     def deco_callit_static(when=when, fct=fct):
         # the top-level decorator, with defaulted fct
         fct = fct.lower()
-        if fct not in POSSIBLE_METH:
-            raise ValueError("'fct' parameter shall be in {}".format(POSSIBLE_METH))
+        if fct not in core.CALLIT_JOYSTICK_METH:
+            raise ValueError("'fct' parameter shall be in " \
+                             " {}".format(core.CALLIT_JOYSTICK_METH))
         after = str(when).lower()[0] == 'a'
         def func_decorator(func):
             # the actual decorator
@@ -151,7 +156,11 @@ def deco_callit(when='after', fct="init"):
                 func(self, **kwargs)  # finally calling some stuff
             # at class-definition, this adds the function name in the
             # top-level decorator
-            core.append(deco_callit_static, ("after" if after else "before") + "_" + fct, getattr(func, 'func_name', getattr(func, '__name__', None)))
+            core.append(deco_callit_static,
+                        ("after" if after else "before") + "_" + fct,
+                        getattr(func,
+                                'func_name',
+                                getattr(func, '__name__', None)))
             return func_wrapper
         return func_decorator
     return deco_callit_static

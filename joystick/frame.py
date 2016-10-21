@@ -39,12 +39,6 @@ class Frame(object):
         Initialises a frame, a base-class used to contain a e.g.
         :py:class:`~joystick.graph.Graph` or :py:class:`~joystick.text.Text`.
 
-        [Optional]
-          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to
-            add to the initialization of the frame.
-          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD`
-            to add code at the updating of the frame.
-
         Args:
           * name (str): the frame name
           * freq_up (float or None): the frequency of update of the
@@ -69,12 +63,18 @@ class Frame(object):
         self._kwargs = kwargs
         # main simu not running
         self._mummy_running = False
+        self._preupdate_fcts = []
         self._init_frame(**self._kwargs)
+
+    _extract_callit = core.extract_callit
+    _callmthd = core.callmthd
 
     def _init_frame(self, **kwargs):
         """
         Separate function from __init__ for re-initialization purpose
         """
+        before, after = self._extract_callit('init')
+        self._callmthd(before, **kwargs)
         self.freq_up = float(kwargs.pop('freq_up'))
         self._running = True and not self._mummy_running
         self._visible = True
@@ -89,7 +89,13 @@ class Frame(object):
             pos = tuple(np.round(np.array(pos) * (w, h)).astype(int))
             size = tuple(np.round(np.array(size) * (w, h)).astype(int))
         self._window.geometry("{}x{}+{}+{}".format(*(size + pos)))
-        core.callmthd(self, core.INITMETHOD, **kwargs)
+        self._callmthd(after, **kwargs)
+        # core.INITMETHOD left for backward compatibility
+        if core.INITMETHOD not in after and hasattr(self, core.INITMETHOD):
+            print("DEPRECATION WARNING: You should add the decorator " \
+                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
+                  " ".format(core.INITMETHOD))
+            self._callmthd(core.INITMETHOD, **kwargs)
 
     @property
     def visible(self):
@@ -100,9 +106,7 @@ class Frame(object):
 
     @visible.setter
     def visible(self, value):
-        raise Exception('hoho')
-        #print("{}Reserved attribute, use 'exit' or 'reinit' methods.{}" \
-        #    .format(core.font.red, core.font.normal))
+        print("Read-only.")
 
     @property
     def typ(self):
@@ -111,9 +115,15 @@ class Frame(object):
         """
         return "_{}".format(self.__class__.__name__.lower())
 
+    def show(self):
+        """
+        Does nothing - a bare frame does not need update
+        """
+        pass
+
     @typ.setter
     def typ(self, value):
-        print("{}Read-only.{}".format(core.font.red, core.font.normal))
+        print("Read-only.")
     
     def reinit(self, **kwargs):
         """
@@ -142,16 +152,15 @@ class Frame(object):
     @running.setter
     def running(self, value):
         if value:
-            self._running = True
-            self._update_loop()
+            self.start()
         else:
-            self._running = False
+            self.stop()
 
     @property
     def freq_up(self):
         """
         Update frequency (Hz) of the frame.
-        Set between 1e-3 and 1e3 Hz, or ``None`` for no updating
+        Set between 1e-3 and 1e2 Hz, or ``None`` for no updating
         """
         return self._freq_up
 
@@ -160,35 +169,57 @@ class Frame(object):
         if value in [None, False]:
             self._freq_up = None
         else:
-            self._freq_up = np.clip(value, 1e-3, 1e3)
+            self._freq_up = np.clip(value, 1e-3, 1e2)
 
     def _update_loop(self):
         """
         Performs the loop-calling job
         """
         if self._mummy_running and self.running and self._freq_up is not None:
-            core.callmthd(self, core.PREUPDATEMETHOD)
-            core.callmthd(self, core.UPDATEMETHOD)
-            self.show()
             self._window.after(int(1000./self.freq_up), self._update_loop)
+            before, after = self._extract_callit('update')
+            self._callmthd(before)
+            self._callmthd(self._preupdate_fcts)
+            self._callmthd(after)
+            # core.UPDATEMETHOD left for backward compatibility
+            if core.UPDATEMETHOD not in after \
+                and core.UPDATEMETHOD not in before \
+                and hasattr(self, core.UPDATEMETHOD):
+                print("DEPRECATION WARNING: You should add the decorator " \
+                  "`@_callit('after', 'update')` on `{}`. Refer to example.py" \
+                  " ".format(core.UPDATEMETHOD))
+                self._callmthd(core.UPDATEMETHOD)
+            self.show()
 
-    def start(self):
+    def start(self, **kwargs):
         """
-        Starts updating the frame
+        Starts updating the frame, even if already running
         """
-        self.running = True
+        before, after = self._extract_callit('start')
+        self._callmthd(before, **kwargs)
+        self._running = True
+        self._update_loop()
+        self._callmthd(after, **kwargs)
 
-    def stop(self):
+    def stop(self, **kwargs):
         """
-        Stops updating the frame
+        Stops updating the frame, if not already stopped
         """
-        self.running = False
+        if self._running:
+            before, after = self._extract_callit('stop')
+            self._callmthd(before, **kwargs)
+            self._running = False
+            self._callmthd(after, **kwargs)
 
-    def exit(self):
+    def exit(self, **kwargs):
         """
-        Terminates the frame
+        Terminates the frame, if not already exited
         """
+        if not self.visible:
+            return
+        before, after = self._extract_callit('exit')
+        self._callmthd(before, **kwargs)
         self.stop()
-        if self.visible:
-            self._window.destroy()
+        self._window.destroy()
         self._visible = False
+        self._callmthd(after, **kwargs)

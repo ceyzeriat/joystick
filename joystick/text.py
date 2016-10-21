@@ -42,12 +42,6 @@ class Text(Frame):
         """
         Initialises a text-frame. Use :py:func:`~joystick.text.Text.add_text` to add text to it.
 
-        [Optional]
-          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
-            initialization of the frame.
-          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD` to add code at
-            the updating of the frame.
-
         Args:
           * name (str): the frame name
           * freq_up (float or None): the frequency of update of the frame,
@@ -92,6 +86,7 @@ class Text(Frame):
         self._kwargs = kwargs
         # call mummy init
         super(Text, self).__init__(**self._kwargs)
+        self._preupdate_fcts = ['_add_pending_lines']
         # call ya own init
         self._init_base(**self._kwargs)
 
@@ -99,6 +94,8 @@ class Text(Frame):
         """
         Separate function from __init__ for re-initialization purpose
         """
+        before, after = self._extract_callit('init')
+        self._callmthd(before, **kwargs)
         self._lines_to_insert = []
         self._isempty = True
         self.rev = bool(kwargs.pop('rev'))
@@ -113,10 +110,17 @@ class Text(Frame):
             scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
             self._text.config(yscrollcommand=scrollbar.set)
             scrollbar.config(command=self._text.yview)
-        self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)            
-        # call the user's init if existing
-        core.callmthd(self, core.PREUPDATEMETHOD)
-        core.callmthd(self, core.INITMETHOD, **kwargs)
+        self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
+        self._add_pending_lines()
+        self._callmthd(after, **kwargs)
+        # core.INITMETHOD left for backward compatibility
+        if core.INITMETHOD not in after \
+            and core.INITMETHOD not in before \
+            and hasattr(self, core.INITMETHOD):
+            print("DEPRECATION WARNING: You should add the decorator " \
+                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
+                  " ".format(core.INITMETHOD))
+            self._callmthd(core.INITMETHOD, **kwargs)
 
     def reinit(self, **kwargs):
         """
@@ -139,7 +143,7 @@ class Text(Frame):
         if self.visible:
             self._text.update_idletasks()
 
-    def _pre_update(self):
+    def _add_pending_lines(self):
         n = len(self._lines_to_insert)
         for i in range(n):
             if self._isempty:

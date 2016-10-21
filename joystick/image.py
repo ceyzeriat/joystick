@@ -44,12 +44,6 @@ class Image(Frame):
         """
         Initialises an image-frame.
 
-        [Optional]
-          * Create a custom method :py:data:`~joystick.core.INITMETHOD` to add to the
-            initialization of the frame.
-          * Create a custom method :py:data:`~joystick.core.UPDATEMETHOD` to add code at
-            the updating of the frame.
-
         Args:
           * name (str): the frame name
           * freq_up (float or None): the frequency of update of the frame,
@@ -98,6 +92,8 @@ class Image(Frame):
         """
         Separate function from __init__ for re-initialization purpose
         """
+        before, after = self._extract_callit('init')
+        self._callmthd(before, **kwargs)
         self._everset = False
         axrect = tuple(kwargs.pop('axrect')[:4])
         self._fig = core.mat.figure.Figure()
@@ -116,8 +112,15 @@ class Image(Frame):
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
         self.reset_image(data=[[0, 0],[0, 0]], **kwargs)
-        core.callmthd(self, core.PREUPDATEMETHOD)
-        core.callmthd(self, core.INITMETHOD, **kwargs)
+        self._callmthd(after, **kwargs)
+        # core.INITMETHOD left for backward compatibility
+        if core.INITMETHOD not in after \
+            and core.INITMETHOD not in before \
+            and hasattr(self, core.INITMETHOD):
+            print("DEPRECATION WARNING: You should add the decorator " \
+                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
+                  " ".format(core.INITMETHOD))
+            self._callmthd(core.INITMETHOD, **kwargs)
 
     @property
     def cmap(self):
