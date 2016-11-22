@@ -41,6 +41,7 @@ import numpy as np
 __all__ = []
 
 
+# @@@ remove that soon
 # la méthode d'initialisation des graphes
 # DEPRECATED
 INITMETHOD = "_init"
@@ -50,11 +51,16 @@ CALLIT_JOYSTICK_METH = ['init', 'start', 'stop', 'exit', 'add_frame']
 
 CALLIT_FRAME_METH = ['init', 'start', 'stop', 'exit', 'update']
 
+# @@@ remove that soon
 # la méthode de mise à jour des graphes
+# DEPRECATED
 UPDATEMETHOD = "_update"
 
 CALLITDECO = "_callit"
 INFINITELOOPDECO = "_infinite_loop"
+
+BASICMULTIFMT = ['bs-', 'gs-', 'rs-', 'cs-', 'ms-', 'ys-', 'bo--', 'go--',
+                 'ro--', 'co--', 'mo--', 'yo--']
 
 # for the documentation
 __doc__ = """Here are some useful constants:
@@ -69,7 +75,7 @@ __doc__ = """Here are some useful constants:
           """
 
 
-MATKWARGS = [item[4:] \
+LINEKWARGS = [item[4:] \
                 for item in mat.lines.Line2D.__dict__.keys() \
                 if 'set_' in item]
 
@@ -82,6 +88,17 @@ TKKWARGS = ['background', 'borderwidth', 'cursor', 'exportselection', 'font',
             'selectforeground', 'setgrid', 'takefocus', 'xscrollcommand',
             'yscrollcommand']
 
+AXKWARGS = ['adjustable', 'agg_filter', 'alpha', 'anchor', 'animated',
+            'aspect', 'autoscale_on', 'autoscalex_on', 'autoscaley_on',
+            'axes', 'axes_locator', 'axis_bgcolor', 'axis_off', 'axis_on',
+            'axisbelow', 'clip_box', 'clip_on', 'clip_path', 'color_cycle',
+            'contains', 'cursor_props', 'figure', 'frame_on', 'gid', 'label',
+            'navigate', 'navigate_mode', 'path_effects', 'picker', 'position',
+            'prop_cycle', 'rasterization_zorder', 'rasterized',
+            'sketch_params', 'snap', 'title', 'transform', 'url', 'visible',
+            'xbound', 'xlabel', 'xlim', 'xmargin', 'xscale', 'xticklabels',
+            'xticks', 'ybound', 'ylabel', 'ylim', 'ymargin', 'yscale',
+            'yticklabels', 'yticks', 'zorder']
 
 def cm_bounds_to_norm(cm_bounds, data=None):
     cmin = float(cm_bounds[0]) if cm_bounds[0] is not None \
@@ -89,6 +106,13 @@ def cm_bounds_to_norm(cm_bounds, data=None):
     cmax = float(cm_bounds[1]) if cm_bounds[1] is not None \
                else (np.max(data) if data is not None else cmin+1)
     return matplotlibpyplotNormalize(cmin, cmax)
+
+
+def get_ith(v, ith):
+    """
+    Returns the ith value of v, or v if v is not iterable
+    """
+    return v[ith] if hasattr(v, '__iter__') else v
 
 
 def colorbar(cmap="jet", cm_bounds=(0, 1)):
@@ -107,34 +131,41 @@ def colorbar(cmap="jet", cm_bounds=(0, 1)):
     return cmap, norm, mappable
 
 
-def matkwargs(kwargs):
+def linekwargs(kwargs, ith=None):
     """
     Returns a copy of kwargs that contains only keys existing
     to matplotlib
     """
-    return extract_kwargs(kwargs, MATKWARGS)
+    return extract_kwargs(kwargs, LINEKWARGS, ith=ith)
+
+def axkwargs(kwargs, ith=None):
+    """
+    Returns a copy of kwargs that contains only keys existing
+    to matplotlib
+    """
+    return extract_kwargs(kwargs, AXKWARGS, ith=ith)
 
 
-def tkkwargs(kwargs):
+def tkkwargs(kwargs, ith=None):
     """
     Returns a copy of kwargs that contains only keys existing
     to tkinter
     """
-    return extract_kwargs(kwargs, TKKWARGS)
+    return extract_kwargs(kwargs, TKKWARGS, ith=ith)
 
 
-def extract_kwargs(kwargs, ll):
+def extract_kwargs(kwargs, ll, ith=None):
     """
     Returns a copy of kwargs that contains only keys found in ll
     """
     dic = {}
     for key, v in kwargs.items():
         if key in ll:
-            dic[key] = v
+            dic[key] = v if ith is None else get_ith(v, ith)
     return dic
 
 
-def callmthd(obj, methodstr, *args, **kwargs):
+def callmthd(obj, methodstr, **kwargs):
     """
     Calls obj.'methodstr' after having tests that it exists and that
     it is callable
@@ -143,11 +174,11 @@ def callmthd(obj, methodstr, *args, **kwargs):
         ret = []
         for item in methodstr:
             if callable(getattr(obj, item, None)):
-                ret.append(getattr(obj, item)(*args, **kwargs))
+                ret.append(getattr(obj, item)(**kwargs))
         return ret
     else:
         if callable(getattr(obj, methodstr, None)):
-            return getattr(obj, methodstr)(*args, **kwargs)
+            return getattr(obj, methodstr)(**kwargs)
 
 
 def extract_callit(obj, fct):

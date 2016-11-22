@@ -68,7 +68,8 @@ class Text(Frame):
           * wrap (str): wrap mechanism (default 'word')
           * undo (bool): authorized undoing if ``True``
           * Any non-abbreviated parameter accepted by ``tkinter.Text``
-          * Will be passed to the optional custom methods
+          * Will be passed to the optional custom methods decorated
+            with :py:func:`~joystick.deco.deco_callit`
         """
         # save input for reinit
         kwargs['name'] = name
@@ -113,6 +114,7 @@ class Text(Frame):
         self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
         self._add_pending_lines()
         self._callmthd(after, **kwargs)
+        # @@@ remove that soon
         # core.INITMETHOD left for backward compatibility
         if core.INITMETHOD not in after \
             and core.INITMETHOD not in before \

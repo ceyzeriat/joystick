@@ -52,7 +52,8 @@ class Frame(object):
             to give then as pixels
 
         Kwargs:
-          * Will be passed to the optional custom methods
+          * Will be passed to the optional custom methods decorated
+            with :py:func:`~joystick.deco.deco_callit`
         """
         # save input for reinit
         kwargs['name'] = name
@@ -90,6 +91,7 @@ class Frame(object):
             size = tuple(np.round(np.array(size) * (w, h)).astype(int))
         self._window.geometry("{}x{}+{}+{}".format(*(size + pos)))
         self._callmthd(after, **kwargs)
+        # @@@ remove that soon
         # core.INITMETHOD left for backward compatibility
         if core.INITMETHOD not in after and hasattr(self, core.INITMETHOD):
             print("DEPRECATION WARNING: You should add the decorator " \
@@ -181,6 +183,7 @@ class Frame(object):
             self._callmthd(before)
             self._callmthd(self._preupdate_fcts)
             self._callmthd(after)
+            # @@@ remove that soon
             # core.UPDATEMETHOD left for backward compatibility
             if core.UPDATEMETHOD not in after \
                 and core.UPDATEMETHOD not in before \

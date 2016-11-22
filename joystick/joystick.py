@@ -47,6 +47,7 @@ class Joystick(object):
         self._frames = []
         self._running = False
         self._callmthd(after, **kwargs)
+        # @@@ remove that soon
         # core.INITMETHOD left for backward compatibility
         if core.INITMETHOD not in after \
             and core.INITMETHOD not in before \

@@ -76,8 +76,9 @@ class Graph(Frame):
 
         Kwargs:
           * Any non-abbreviated parameter accepted by ``figure.add_axes``
-            and ``plt.plot``
-          * Will be passed to the optional custom methods
+            (eg. ``xlabel``, ``ylabel``, ``title``, aspect``) and ``plt.plot``
+          * Will be passed to the optional custom methods decorated
+            with :py:func:`~joystick.deco.deco_callit`
         """
         kwargs['name'] = name
         kwargs['freq_up'] = freq_up
@@ -106,6 +107,21 @@ class Graph(Frame):
         """
         before, after = self._extract_callit('init')
         self._callmthd(before, **kwargs)
+        self._init_basic_graph(**kwargs)
+        self.ax.plot(0, 0, kwargs.pop('fmt'), **core.linekwargs(kwargs))
+        self._scale_axes()
+        self._callmthd(after, **kwargs)
+        # @@@ remove that soon
+        # core.INITMETHOD left for backward compatibility
+        if core.INITMETHOD not in after \
+            and core.INITMETHOD not in before \
+            and hasattr(self, core.INITMETHOD):
+            print("DEPRECATION WARNING: You should add the decorator " \
+                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
+                  " ".format(core.INITMETHOD))
+            self._callmthd(core.INITMETHOD, **kwargs)
+
+    def _init_basic_graph(self, **kwargs):
         self.xnptsmax = int(kwargs.pop('xnptsmax'))
         self.xylim = tuple(kwargs.pop('xylim')[:4])
         self.axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
@@ -114,7 +130,7 @@ class Graph(Frame):
         self._fig = core.mat.figure.Figure()
         self.ax = self._fig.add_axes(axrect[:2] + (axrect[2]-axrect[0],
                                                    axrect[3]-axrect[1]),
-                                     **core.matkwargs(kwargs))
+                                     **core.axkwargs(kwargs))
         self._canvas = FigureCanvasTkAgg(self._fig, master=self._window)
         self._canvas.show()
         self._canvas.get_tk_widget().pack(side=tkinter.TOP,
@@ -127,17 +143,6 @@ class Graph(Frame):
         grid = kwargs.pop('grid')
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
-        self.ax.plot(0, 0, kwargs.pop('fmt'), **core.matkwargs(kwargs))
-        self._scale_axes()
-        self._callmthd(after, **kwargs)
-        # core.INITMETHOD left for backward compatibility
-        if core.INITMETHOD not in after \
-            and core.INITMETHOD not in before \
-            and hasattr(self, core.INITMETHOD):
-            print("DEPRECATION WARNING: You should add the decorator " \
-                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
-                  " ".format(core.INITMETHOD))
-            self._callmthd(core.INITMETHOD, **kwargs)
 
     def reinit(self, **kwargs):
         """
@@ -196,7 +201,7 @@ class Graph(Frame):
         """
         Sets the x and y data of the graph.
         Give x and y vectors as numpy arrays; only the last
-        ``Graph.xnpts`` data-points will be displayed
+        :py:func:`~joystick.graph.Graph.xnpts` data-points will be displayed
         """
         if self.visible:
             self.ax.lines[0].set_xdata(x[-self.xnpts:])
@@ -235,6 +240,10 @@ class Graph(Frame):
         if self.visible:
             return self.ax.get_xlim() + self.ax.get_ylim()
 
+    def _get_xydata_minmax(self):
+        x, y = self.get_xydata()
+        return np.min(x), np.max(x), np.min(y), np.max(y)
+
     def _scale_axes(self):
         """
         Does the axes scaling
@@ -243,11 +252,11 @@ class Graph(Frame):
         xmin, xmax, ymin, ymax = self.xylim
         if xmin is None and xmax is None and ymin is None and ymax is None:
             return
-        x, y = self.get_xydata()
-        xmin_f = x.min() if xmin is None else xmin
-        xmax_f = max(x.max(), xmin_f+self._minmini) if xmax is None else xmax
-        ymin_f = y.min() if ymin is None else ymin
-        ymax_f = max(y.max(), ymin_f+self._minmini) if ymax is None else ymax
+        xmin_f, xmax_f, ymin_f, ymax_f = self._get_xydata_minmax()
+        xmin_f = xmin_f if xmin is None else xmin
+        xmax_f = max(xmax_f, xmin_f+self._minmini) if xmax is None else xmax
+        ymin_f = ymin_f if ymin is None else ymin
+        ymax_f = max(ymax_f, ymin_f+self._minmini) if ymax is None else ymax
         if self.axmargin[0] != 1.0:
             dx = (self.axmargin[0]-1)*(xmax_f-xmin_f)*0.5
             if xmin is None:
