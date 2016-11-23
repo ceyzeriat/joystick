@@ -27,7 +27,6 @@
 import matplotlib as mat
 mat.use('TkAgg')
 from matplotlib import lines
-#from matplotlib.backends import backend_tkagg
 import matplotlib.cm
 from matplotlib.pyplot import Normalize as matplotlibpyplotNormalize
 try:
