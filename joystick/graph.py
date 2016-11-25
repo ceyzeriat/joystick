@@ -36,8 +36,8 @@ __all__ = ['Graph']
 
 class Graph(Frame):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
-                 screen_relative=False, xnpts=30, fmt="ro-",
-                 bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
+                 screen_relative=False, xnpts=30, fmt="ro-", bgcol='w',
+                 axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
                  xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
                  **kwargs):
         """
@@ -57,7 +57,8 @@ class Graph(Frame):
           * screen_relative (bool) [optional]: set to ``True`` to give
             ``pos`` and ``size`` as a % of the screen size, or ``False``
             to give then as pixels
-          * xnpts (int) [optional]: the number of data points to be plotted
+          * xnpts (int or None) [optional]: the number of data points to be
+            plotted. If ``None``, no limit is applied.
           * fmt (str) [optional]: the format of the line as in
             ``plt.plot(x, y, fmt)``
           * bgcol (color) [optional]: the background color of the graph
@@ -68,8 +69,9 @@ class Graph(Frame):
           * xylim (list of 4 floats or None) [optional]: the values of the
             axes limits (xmin, xmax, ymin, ymax), where any value can take
             ``None`` to be recalculated according to the data at each update
-          * xnptsmax (int) [optional]: the maximum number of data points to
-            be recorded, older data points will be deleted
+          * xnptsmax (int or None) [optional]: the maximum number of data
+            points to be recorded, older data points will be deleted. If
+            ``None``, no limit is applied.
           * axmargin (tuple of 2 floats) [optional]: a expand factor to
             increase the (x, y) axes limits when they are automatically
             calculated from the data (i.e. some xylim is ``None``)
@@ -170,32 +172,38 @@ class Graph(Frame):
         """
         The maximum number of data points to be recorded, older data
         points will be deleted. Must be > 1.
+        If ``None``, no limit is applied.
         """
         return self._xnptsmax
 
     @xnptsmax.setter
     def xnptsmax(self, value):
-        if value < 1:
+        if value is None:
+            self._xnptsmax = None
+        elif value >= 1:
+            self._xnptsmax = int(value)
+        else:
             print("{}Invalid value. Must be > 1{}" \
             .format(core.font.red, core.font.normal))
-            return
-        self._xnptsmax = int(value)
-    
+
     @property
     def xnpts(self):
         """
         The number of data points to be plotted. Must be
         1 < xnpts <= ``Graph.xnptsmax``.
+        If ``None``, no limit is applied.
         """
         return self._xnpts
 
     @xnpts.setter
     def xnpts(self, value):
-        if not 1 < value <= self.xnptsmax:
+        if value is None:
+            self._xnpts = None
+        elif 1 < value <= self.xnptsmax:
+            self._xnpts = int(value)
+        else:
             print("{}Invalid value. Must be 1--{}{}" \
-            .format(core.font.red, self.xnptsmax, core.font.normal))
-            return
-        self._xnpts = int(value)
+            .format(core.font.red, self.xnptsmax, core.font.normal))        
 
     def set_xydata(self, x, y):
         """
@@ -204,8 +212,12 @@ class Graph(Frame):
         :py:func:`~joystick.graph.Graph.xnpts` data-points will be displayed
         """
         if self.visible:
-            self.ax.lines[0].set_xdata(x[-self.xnpts:])
-            self.ax.lines[0].set_ydata(y[-self.xnpts:])
+            if self.xnpts is not None:
+                self.ax.lines[0].set_xdata(x[-self.xnpts:])
+                self.ax.lines[0].set_ydata(y[-self.xnpts:])
+            else:
+                self.ax.lines[0].set_xdata(x)
+                self.ax.lines[0].set_ydata(y)
 
     def get_xydata(self):
         """

@@ -31,21 +31,22 @@ np = core.np
 from .graph import Graph
 
 
-__all__ = ['GraphMulti']
+__all__ = ['Scatter']
 
 
-class GraphMulti(Graph):
+class Scatter(Graph):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
-                 screen_relative=False, xnpts=30, nlines=2, numbering=True,
-                 lbls=None, legend=2, fmt=None, bgcol='w',
-                 axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
-                 xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
-                  **kwargs):
+                 screen_relative=False, xnpts=30, m_color='r', m_size=20,
+                 m_shape='o', bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9),
+                 grid='k', xylim=(0., None, 0., None), xnptsmax=50,
+                 axmargin=(1.1, 1.1), **kwargs):
         """
-        Initialises a graph-frame. Use :py:func:`~joystick.graph.Graph.set_xydata` and
-        :py:func:`~joystick.graphGraph.get_xydata` to set and get the x- and y-data of the
-        graph, or :py:func:`~joystick.graphGraph.set_xylim` and :py:func:`~joystick.graphGraph.get_xylim` to
-        get and set the axes limits.
+        Initialises a graph-frame. Use
+        :py:func:`~joystick.graph.Graph.set_xydata` and
+        :py:func:`~joystick.graphGraph.get_xydata` to set and get the x- and
+        y-data of the graph, or :py:func:`~joystick.graphGraph.set_xylim` and
+        :py:func:`~joystick.graphGraph.get_xylim` to get and set the axes
+        limits.
 
         Args:
           * name (str): the frame name
@@ -60,15 +61,11 @@ class GraphMulti(Graph):
             to give then as pixels
           * xnpts (int or None) [optional]: the number of data points to be
             plotted. If ``None``, no limit is applied.
-          * nlines (int): the number of lines in the frame
-          * numbering (bool) [optional]: whether to display the index of
-            the lines near the left-most data-point
-          * lbls (list of str) [optional]: the labels to display in the
-            legend. Default ``None`` is equivalent to ``['L0', ..., 'Ln-1']``
-          * legend (int or False) [optional]: if ``False``: no legend, else
-            ``legend`` is its location (0 to 10, see `loc` in plt.legend)
-          * fmt (str or list of str) [optional]: the format of the lines as in
-            ``plt.plot(x, y, fmt)``. Leave to ``None`` for auto.
+          * m_color (color, sequence, or sequence of color): the color of the
+            markers, as in ``plt.scatter``.
+          * m_size (scalar or vector): the size of the markers, as in
+            ``plt.scatter``
+          * m_shape (char): the shape of the markers, as in ``plt.scatter``
           * bgcol (color) [optional]: the background color of the graph
           * axrect (list of 4 floats) [optional]: the axes bounds (l,b,w,h)
             as in ``plt.figure.add_axes(rect=(l,b,w,h))``
@@ -85,22 +82,15 @@ class GraphMulti(Graph):
             calculated from the data (i.e. some xylim is ``None``)
 
         Kwargs:
-          * Any parameter accepted by ``plt.figure.add_axes`` (eg. ``xlabel``,
-            ``ylabel``, ``title``, aspect``, etc)
-          * Any parameter accepted by ``plt.plot`` (either a single element
-            or a list of ``nlines`` elements)
+          * Any non-abbreviated parameter accepted by ``figure.add_axes``
+            (eg. ``xlabel``, ``ylabel``, ``title``, aspect``) and
+            ``plt.scatter``
           * Will be passed to the optional custom methods decorated
             with :py:func:`~joystick.deco.deco_callit`
         """
-        kwargs['nlines'] = nlines
-        kwargs['lbls'] = lbls
-        kwargs['legend'] = legend
-        kwargs['numbering'] = numbering
-        if fmt is None:
-            # replicate the basic formating as necessary
-            fmt = (core.BASICMULTIFMT
-                  * (int(nlines)//len(core.BASICMULTIFMT)+1)
-                  )[:int(nlines)]
+        kwargs['m_color'] = m_color
+        kwargs['m_size'] = m_size
+        kwargs['m_shape'] = m_shape
         super(GraphMulti, self).__init__(name=name, freq_up=freq_up, pos=pos,
                  size=size, screen_relative=screen_relative, xnpts=xnpts,
                  fmt=fmt, bgcol=bgcol, axrect=axrect, grid=grid, xylim=xylim,
@@ -144,7 +134,8 @@ class GraphMulti(Graph):
         """
         if x is None or y is None:
             x, y = self.get_xydata(ln=ith)
-        self.ax.text(x, y, str(ith), color='w', bbox=dict(color='k', alpha=0.5))
+        self.ax.text(x, y, str(ith), color='w', bbox=dict(color='k',
+                                                          alpha=0.5))
 
     @property
     def lbls(self):
@@ -230,7 +221,7 @@ class GraphMulti(Graph):
         If ``ln`` is an integer (i.e. line-index), only this line will
         be updated x and y shall be numpy 1d-vectors.
 
-        For each line, only the last :py:func:`~joystick.graph.GraphMulti.xnpts`
+        For each line only the last :py:func:`~joystick.graph.GraphMulti.xnpts`
         data-points will be displayed
         """
         if not self.visible:
@@ -252,7 +243,9 @@ class GraphMulti(Graph):
             self.ax.lines[ith].set_xdata(x)
             self.ax.lines[ith].set_ydata(y)
         if self.numbering:
-            idx = -self.xnpts if (x.size >= self.xnpts and self.xnpts is not None) else 0
+            idx = -self.xnpts\
+                  if (x.size >= self.xnpts and self.xnpts is not None)\
+                  else 0
             self.ax.texts[ith].set_position((x[idx], y[idx]))
     
     def get_xydata(self, ln=None):

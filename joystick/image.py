@@ -100,7 +100,7 @@ class Image(Frame):
         self._fig = core.mat.figure.Figure()
         self.ax = self._fig.add_axes(axrect[:2] + (axrect[2]-axrect[0],
                                                    axrect[3]-axrect[1]),
-                                     **core.matkwargs(kwargs))
+                                     **core.axkwargs(kwargs))
         self._canvas = FigureCanvasTkAgg(self._fig, master=self._window)
         self._canvas.show()
         self._canvas.get_tk_widget().pack(side=tkinter.TOP,
@@ -180,7 +180,7 @@ class Image(Frame):
         self._img = self.ax.imshow(data, cmap=self._cmap, norm=self._norm,
                                    origin=kwargs.get('origin', 'lower'),
                                    aspect=kwargs.get('aspect', 'auto'),
-                                   extent=extent, **core.matkwargs(kwargs))
+                                   extent=extent, **core.linekwargs(kwargs))
         self._everset = True
 
     def reinit(self, **kwargs):

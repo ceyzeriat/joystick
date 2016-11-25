@@ -83,7 +83,6 @@ class Joystick(object):
         for item in self._frames:
             item._mummy_running = self._running
 
-
     def add_frame(self, frame, **kwargs):
         """
         Adds a frame to the simulation. Use it as:

@@ -66,7 +66,7 @@ class test(jk.Joystick):
     @_infinite_loop(wait_time=0.2)
     def _get_data(self):
         # This method will automatically be called with simulation start
-        # (t.start()), and looped every 0.2 in a separate thread as long as
+        # (t.start()), and looped every 0.2 sec in a separate thread as long as
         # the simulation runs (running == True)
         # It gets new data (fake random data) and pushes it to the frames.
         # concatenate data on the time x-axis

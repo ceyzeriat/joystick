@@ -47,19 +47,20 @@ class test(Joystick):
         """
         Function called at initialization, don't bother why for now
         """
-        self._t0 = time.time()  # initialize time
-        self.xdata = np.array([self._t0])  # time x-axis
-        self.ydata = np.array([0.0])  # fake data y-axis
-        # create a graph frame
-        self.mygraph = self.add_frame(
-                          Graph(name="test", size=(500, 500),
-                                pos=(50, 50), fmt="go-", xnpts=15,
-                                freq_up=7, bgcol="y", xylim=(0,10,0,1)))
-        # create a text frame
+        self._t0 = time.time()
+        self.xdata = np.array([self._t0])
+        self.ydata = np.array([0.0])
+        self.mmgraph = self.add_frame(
+                    GraphMulti(name="test", size=(500, 500), pos=(50, 50),
+                               xnpts=15, freq_up=7, bgcol="y", nlines=2,
+                               xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
         self.mytext = self.add_frame(
-                         Text(name="Y-overflow",
-                              size=(500, 250), pos=(600, 50), freq_up=1))
-        # create a image frame
+                        Text(name="Y-overflow", size=(500, 250),
+                             pos=(600, 50), freq_up=1))
+        self.mygraph = self.add_frame(
+                        Graph(name="test", size=(500, 500),
+                              pos=(50, 50), fmt="go-", xnpts=15,
+                              freq_up=7, bgcol="y", xylim=(0,10,0,1)))
         self.myimg = self.add_frame(
                         Image(name="IMG", size=(100, 100), pos=(50, 600),
                               axrect=(0,0,1,1), freq_up=3,
@@ -98,32 +99,36 @@ class test(Joystick):
 
 
 class test2(Joystick):
-   # initialize the infinite loop decorator
     _infinite_loop = deco_infinite_loop()
     _callit = deco_callit()
 
+    @_callit('before', 'init')
+    def _init_data(self, *args, **kwargs):
+        self.xdata = np.array([])
+        self.ydata1 = np.array([])
+        self.ydata2 = np.array([])
+
     @_callit('after', 'init')
-    def _initialization(self, *args, **kwargs):
-        """
-        Function called at initialization, with the decorator
-        """
-        self._t0 = time.time()  # initialize time
-        self.xdata = np.array([self._t0])  # time x-axis
-        self.ydata = np.array([0.0])  # fake data y-axis
-        # create a graph frame
-        self.mygraph = self.add_frame(
-                          Graph(name="test", size=(500, 500),
-                                pos=(50, 50), fmt="go-", xnpts=15,
-                                freq_up=7, bgcol="y", xylim=(0,10,0,1)))
-        # create a text frame
+    def _build_frames(self, *args, **kwargs):
+        self.mmgraph = self.add_frame(
+                    GraphMulti(name="test", size=(500, 500), pos=(50, 50),
+                               xnpts=15, freq_up=7, bgcol="y", nlines=2,
+                               xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
         self.mytext = self.add_frame(
-                         Text(name="Y-overflow",
-                              size=(500, 250), pos=(600, 50), freq_up=1))
-        # create a image frame
+                        Text(name="Y-overflow", size=(500, 250),
+                             pos=(600, 50), freq_up=1))
+        self.mygraph = self.add_frame(
+                        Graph(name="test", size=(500, 500),
+                              pos=(50, 50), fmt="go-", xnpts=15,
+                              freq_up=7, bgcol="y", xylim=(0,10,0,1)))
         self.myimg = self.add_frame(
                         Image(name="IMG", size=(100, 100), pos=(50, 600),
                               axrect=(0,0,1,1), freq_up=3,
                               cm_bounds = (0, 1)))
+
+    @_callit('before', 'start')
+    def _set_t0(self):
+        self._t0 = time.time()
 
     @_infinite_loop(wait_time=1)
     def _generate_fake_data(self):  # function looped every 0.2 second
@@ -156,46 +161,41 @@ class test2(Joystick):
         self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
 
 
+def _hophop():
+    t = test()
+    t.start()
+    time.sleep(1)
+    t.mygraph.xylim = (None, None, 0, 1)
+    t.mygraph.xnpts = 50
+    t.mygraph.freq_up = 2
+    time.sleep(1)
+    t.stop()
+    t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
+    time.sleep(1)
+    t.start()
+    time.sleep(1)
+    t.mmgraph.lbls = None
+    t.mmgraph.lbls = ['aa', 'bb']
+    t.mmgraph.legend(show=True, lbls=None)
+    t.mmgraph.legend(show=False)
+    t.mmgraph.numbering = True
+    t.mmgraph.numbering = False
+    t.stop()
+    t.exit()
+
+def _hophophop():
+    t = test()
+    time.sleep(1)
+    t.exit()
 
 def testdeprecated_create():
-    t = test()
-    time.sleep(1)
-    t.exit()
+    _hophophop()
 
 def testdeprecated_play():
-    t = test()
-    t.start()
-    time.sleep(1)
-    t.mygraph.xylim = (None, None, 0, 1)
-    t.mygraph.xnpts = 50
-    t.mygraph.freq_up = 2
-    time.sleep(1)
-    t.stop()
-    t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
-    time.sleep(1)
-    t.start()
-    time.sleep(1)
-    t.stop()
-    t.exit()
-
+    _hophop()
 
 def test_create():
-    t = test()
-    time.sleep(1)
-    t.exit()
+    _hophophop()
 
 def test_play():
-    t = test()
-    t.start()
-    time.sleep(1)
-    t.mygraph.xylim = (None, None, 0, 1)
-    t.mygraph.xnpts = 50
-    t.mygraph.freq_up = 2
-    time.sleep(1)
-    t.stop()
-    t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
-    time.sleep(1)
-    t.start()
-    time.sleep(1)
-    t.stop()
-    t.exit()
+    _hophop()
