@@ -73,7 +73,7 @@ def _build_frames_base(self):
                            xnpts=15, freq_up=7, bgcol="y", nlines=2,
                            xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
     self.mytext = self.add_frame(
-                    Text(name="Text, size=(500, 250),
+                    Text(name="Text", size=(500, 250),
                          pos=(600, 50), freq_up=1))
     self.mygraph = self.add_frame(
                     Graph(name="Graph", size=(500, 500),
