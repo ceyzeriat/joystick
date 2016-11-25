@@ -40,63 +40,68 @@ from .. import core
 # VERY IMPORTANT - screen_relative must be False for testing (not supported by
 #   Travis)
 
+
+def _generate_fake_data_base(self):
+    self.xdata = core.add_datapoint(self.xdata,
+                                    time.time(),
+                                    xnptsmax=self.mygraph.xnptsmax)
+    # concatenate data on the fake data y-axis
+    self.ydata = core.add_datapoint(self.ydata,
+                                    np.random.random()*1.05,
+                                    xnptsmax=self.mygraph.xnptsmax)
+    # check overflow for the last data point added
+    if self.ydata[-1] > 1:
+        # send warning to the text-frame
+        self.mytext.add_text('Some data bumped into the ceiling: ' \
+                             '{:.3f}'.format(self.ydata[-1]))
+    # prepare the time axis
+    t = np.round(self.xdata-self._t0, 1)
+    # push new data to the graph
+    self.mygraph.set_xydata(t, self.ydata1)
+    self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata2])
+
+
+def _generate_fake_image_base(self):
+    data = np.random.random((10,10))**3
+    self.myimg.set_data(data)
+    self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
+
+
+def _build_frames_base(self):
+    self.mmgraph = self.add_frame(
+                GraphMulti(name="GraphMulti", size=(500, 500), pos=(50, 50),
+                           xnpts=15, freq_up=7, bgcol="y", nlines=2,
+                           xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
+    self.mytext = self.add_frame(
+                    Text(name="Text, size=(500, 250),
+                         pos=(600, 50), freq_up=1))
+    self.mygraph = self.add_frame(
+                    Graph(name="Graph", size=(500, 500),
+                          pos=(50, 50), fmt="go-", xnpts=15,
+                          freq_up=7, bgcol="y", xylim=(0,10,0,1)))
+    self.myimg = self.add_frame(
+                    Image(name="Image", size=(100, 100), pos=(50, 600),
+                          axrect=(0,0,1,1), freq_up=3,
+                          cm_bounds = (0, 1)))
+
+
 class test(Joystick):
-   # initialize the infinite loop decorator
     _infinite_loop = deco_infinite_loop()
 
     def _init(self, *args, **kwargs):
-        """
-        Function called at initialization, don't bother why for now
-        """
         self._t0 = time.time()
-        self.xdata = np.array([self._t0])
-        self.ydata = np.array([0.0])
-        self.mmgraph = self.add_frame(
-                    GraphMulti(name="test", size=(500, 500), pos=(50, 50),
-                               xnpts=15, freq_up=7, bgcol="y", nlines=2,
-                               xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
-        self.mytext = self.add_frame(
-                        Text(name="Y-overflow", size=(500, 250),
-                             pos=(600, 50), freq_up=1))
-        self.mygraph = self.add_frame(
-                        Graph(name="test", size=(500, 500),
-                              pos=(50, 50), fmt="go-", xnpts=15,
-                              freq_up=7, bgcol="y", xylim=(0,10,0,1)))
-        self.myimg = self.add_frame(
-                        Image(name="IMG", size=(100, 100), pos=(50, 600),
-                              axrect=(0,0,1,1), freq_up=3,
-                              cm_bounds = (0, 1)))
+        self.xdata = np.array([])
+        self.ydata1 = np.array([])
+        self.ydata2 = np.array([])
+        _build_frames_base(self)        
 
     @_infinite_loop(wait_time=1)
-    def _generate_fake_data(self):  # function looped every 0.2 second
-        """
-        Loop starting with simulation start, getting data and
-        pushing it to the graph every 0.2 seconds
-        """
-        # concatenate data on the time x-axis
-        self.xdata = core.add_datapoint(self.xdata,
-                                        time.time(),
-                                        xnptsmax=self.mygraph.xnptsmax)
-        # concatenate data on the fake data y-axis
-        self.ydata = core.add_datapoint(self.ydata,
-                                        np.random.random()*1.05,
-                                        xnptsmax=self.mygraph.xnptsmax)
-        # check overflow for the last data point added
-        if self.ydata[-1] > 1:
-            # send warning to the text-frame
-            self.mytext.add_text('Some data bumped into the ceiling: ' \
-                                 '{:.3f}'.format(self.ydata[-1]))
-        # prepare the time axis
-        t = np.round(self.xdata-self._t0, 1)
-        # push new data to the graph
-        self.mygraph.set_xydata(t, self.ydata)
+    def _generate_fake_data(self):
+        _generate_fake_data_base(self)
 
     @_infinite_loop(wait_time=5)
-    def _generate_fake_image(self):  # function looped every 5 second
-        data = np.random.random((10,10))**3
-        self.myimg.set_data(data)
-        self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
-
+    def _generate_fake_image(self):
+        _generate_fake_image_base(self)
 
 
 class test2(Joystick):
@@ -111,55 +116,19 @@ class test2(Joystick):
 
     @_callit('after', 'init')
     def _build_frames(self, *args, **kwargs):
-        self.mmgraph = self.add_frame(
-                    GraphMulti(name="test", size=(500, 500), pos=(50, 50),
-                               xnpts=15, freq_up=7, bgcol="y", nlines=2,
-                               xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
-        self.mytext = self.add_frame(
-                        Text(name="Y-overflow", size=(500, 250),
-                             pos=(600, 50), freq_up=1))
-        self.mygraph = self.add_frame(
-                        Graph(name="test", size=(500, 500),
-                              pos=(50, 50), fmt="go-", xnpts=15,
-                              freq_up=7, bgcol="y", xylim=(0,10,0,1)))
-        self.myimg = self.add_frame(
-                        Image(name="IMG", size=(100, 100), pos=(50, 600),
-                              axrect=(0,0,1,1), freq_up=3,
-                              cm_bounds = (0, 1)))
+        _build_frames_base(self)
 
     @_callit('before', 'start')
     def _set_t0(self):
         self._t0 = time.time()
 
     @_infinite_loop(wait_time=1)
-    def _generate_fake_data(self):  # function looped every 0.2 second
-        """
-        Loop starting with simulation start, getting data and
-        pushing it to the graph every 0.2 seconds
-        """
-        # concatenate data on the time x-axis
-        self.xdata = core.add_datapoint(self.xdata,
-                                        time.time(),
-                                        xnptsmax=self.mygraph.xnptsmax)
-        # concatenate data on the fake data y-axis
-        self.ydata = core.add_datapoint(self.ydata,
-                                        np.random.random()*1.05,
-                                        xnptsmax=self.mygraph.xnptsmax)
-        # check overflow for the last data point added
-        if self.ydata[-1] > 1:
-            # send warning to the text-frame
-            self.mytext.add_text('Some data bumped into the ceiling: ' \
-                                 '{:.3f}'.format(self.ydata[-1]))
-        # prepare the time axis
-        t = np.round(self.xdata-self._t0, 1)
-        # push new data to the graph
-        self.mygraph.set_xydata(t, self.ydata)
+    def _generate_fake_data(self):
+        _generate_fake_data_base(self)
 
     @_infinite_loop(wait_time=5)
-    def _generate_fake_image(self):  # function looped every 5 second
-        data = np.random.random((10,10))**3
-        self.myimg.set_data(data)
-        self.mytext.add_text('Updated graph, mean: {:.3f}'.format(data.mean()))
+    def _generate_fake_image(self):
+        _generate_fake_image_base(self)
 
 
 def _hophop():
@@ -188,6 +157,7 @@ def _hophophop():
     t = test()
     time.sleep(1)
     t.exit()
+
 
 def testdeprecated_create():
     _hophophop()
