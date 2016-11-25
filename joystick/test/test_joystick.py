@@ -33,6 +33,7 @@ from ..deco import deco_infinite_loop, deco_callit
 from ..graph import Graph
 from ..image import Image
 from ..text import Text
+from ..graphmulti import GraphMulti
 from .. import core
 
 
