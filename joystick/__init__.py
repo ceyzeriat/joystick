@@ -39,6 +39,7 @@ except:
 from .core import *
 from .graph import *
 from .graphmulti import *
+from .scatter import *
 from .image import *
 from .text import *
 from .joystick import *

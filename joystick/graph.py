@@ -226,6 +226,10 @@ class Graph(Frame):
         if self.visible:
             return self.ax.lines[0].get_xdata(), self.ax.lines[0].get_ydata()
 
+    def _get_xydata_minmax(self):
+        x, y = self.get_xydata()
+        return np.min(x), np.max(x), np.min(y), np.max(y)
+
     def set_xylim(self, xylim=(None, None, None, None)):
         """
         Sets the (xmin, xmax, ymin, ymax) limits of the graph.
@@ -251,10 +255,6 @@ class Graph(Frame):
         """
         if self.visible:
             return self.ax.get_xlim() + self.ax.get_ylim()
-
-    def _get_xydata_minmax(self):
-        x, y = self.get_xydata()
-        return np.min(x), np.max(x), np.min(y), np.max(y)
 
     def _scale_axes(self):
         """

@@ -252,8 +252,13 @@ class GraphMulti(Graph):
             self.ax.lines[ith].set_xdata(x)
             self.ax.lines[ith].set_ydata(y)
         if self.numbering:
-            idx = -self.xnpts if (x.size >= self.xnpts and self.xnpts is not None) else 0
-            self.ax.texts[ith].set_position((x[idx], y[idx]))
+            idx = -self.xnpts\
+                  if (x.size >= self.xnpts and self.xnpts is not None)\
+                  else 0
+            xybox= (x[idx], y[idx])\
+                   if x.size > 0 and y.size > 0\
+                   else (0, 0)
+            self.ax.texts[ith].set_position(xybox)
     
     def get_xydata(self, ln=None):
         """

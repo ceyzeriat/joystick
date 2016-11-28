@@ -51,12 +51,16 @@ class test(jk.Joystick):
         # create a graph frame
         self.mygraph = self.add_frame(
                    jk.GraphMulti(name="test", size=(500, 500), pos=(50, 50),
-                                 xnpts=15, freq_up=7, bgcol="y", nlines=2,
+                                 xnpts=15, freq_up=7, bgcol="w", nlines=2,
                                  xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
         # create a text frame
         self.mytext = self.add_frame(
                       jk.Text(name="Y-overflow", size=(500, 250),
                               pos=(600, 50), freq_up=1))
+        self.myscatter = self.add_frame(
+                      jk.Scatter(name="scatter", size=(500, 500), pos=(600, 350),
+                                 xnpts=15, freq_up=7, bgcol="y",
+                                 xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
 
     @_callit('before', 'start')
     def _set_t0(self):
@@ -90,7 +94,10 @@ class test(jk.Joystick):
         # prepare the time axis
         t = np.round(self.xdata-self._t0, 1)
         # push new data to the graph
-        self.mygraph.set_xydata([t, t], [self.ydata1, self.ydata2])
+        self.mygraph.set_xydata([t, t[slice(0, -1, 3)]],
+                                [self.ydata1, self.ydata2[slice(0, -1, 3)]])
+        self.myscatter.set_xydata(self.ydata1, self.ydata2, c=self.ydata1)
+
 
     @_callit('before', 'exit')
     def exit_warning(self):
@@ -107,16 +114,21 @@ t.mygraph.xylim = (None, None, 0, 1)
 t.mygraph.xnpts = 50
 
 t.mygraph.freq_up = 2
+t.myscatter.xylim = (0,1,0,1)
 
 t.mygraph.numbering = False
 t.mygraph.lbls = ['rnd', 'rnd**2']
 
-t.stop()
 
-t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
 
-t.start()
 
-t.stop()
 
-t.exit()
+#t.stop()
+
+#t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
+
+#t.start()
+
+#t.stop()
+
+#t.exit()

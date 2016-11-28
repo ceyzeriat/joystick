@@ -34,6 +34,7 @@ from ..graph import Graph
 from ..image import Image
 from ..text import Text
 from ..graphmulti import GraphMulti
+from ..scatter import Scatter
 from .. import core
 
 

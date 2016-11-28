@@ -28,6 +28,7 @@ from . import core
 tkinter = core.tkinter
 FigureCanvasTkAgg = core.mat.backends.backend_tkagg.FigureCanvasTkAgg
 np = core.np
+matplotlibpyplotNormalize = core.matplotlibpyplotNormalize
 from .graph import Graph
 
 
@@ -36,10 +37,11 @@ __all__ = ['Scatter']
 
 class Scatter(Graph):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
-                 screen_relative=False, xnpts=30, m_color='r', m_size=20,
-                 m_shape='o', bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9),
-                 grid='k', xylim=(0., None, 0., None), xnptsmax=50,
-                 axmargin=(1.1, 1.1), **kwargs):
+                 screen_relative=False, xnpts=30, c='r', s=20,
+                 bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
+                 xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
+                 cmap='gist_earth', vmin=None, vmax=None, **kwargs):
+                 
         """
         Initialises a graph-frame. Use
         :py:func:`~joystick.graph.Graph.set_xydata` and
@@ -61,11 +63,10 @@ class Scatter(Graph):
             to give then as pixels
           * xnpts (int or None) [optional]: the number of data points to be
             plotted. If ``None``, no limit is applied.
-          * m_color (color, sequence, or sequence of color): the color of the
+          * c (color, sequence, or sequence of color): the color of the
             markers, as in ``plt.scatter``.
-          * m_size (scalar or vector): the size of the markers, as in
+          * s (scalar or vector): the size of the markers, as in
             ``plt.scatter``
-          * m_shape (char): the shape of the markers, as in ``plt.scatter``
           * bgcol (color) [optional]: the background color of the graph
           * axrect (list of 4 floats) [optional]: the axes bounds (l,b,w,h)
             as in ``plt.figure.add_axes(rect=(l,b,w,h))``
@@ -80,6 +81,11 @@ class Scatter(Graph):
           * axmargin (tuple of 2 floats) [optional]: a expand factor to
             increase the (x, y) axes limits when they are automatically
             calculated from the data (i.e. some xylim is ``None``)
+          * cmap (str or colormap): the colormap of the scatter colors
+          * vmin (float or None): the value corresponding to the min of
+            the colorbar, or ``None`` for auto-scaling
+          * vmax (float or None): the value corresponding to the max of
+            the colorbar, or ``None`` for auto-scaling
 
         Kwargs:
           * Any non-abbreviated parameter accepted by ``figure.add_axes``
@@ -88,35 +94,45 @@ class Scatter(Graph):
           * Will be passed to the optional custom methods decorated
             with :py:func:`~joystick.deco.deco_callit`
         """
-        kwargs['m_color'] = m_color
-        kwargs['m_size'] = m_size
-        kwargs['m_shape'] = m_shape
-        super(GraphMulti, self).__init__(name=name, freq_up=freq_up, pos=pos,
+        kwargs['c'] = c
+        kwargs['s'] = s
+        kwargs['cmap'] = cmap
+        kwargs['vmin'] = vmin
+        kwargs['vmax'] = vmax
+        super(Scatter, self).__init__(name=name, freq_up=freq_up, pos=pos,
                  size=size, screen_relative=screen_relative, xnpts=xnpts,
-                 fmt=fmt, bgcol=bgcol, axrect=axrect, grid=grid, xylim=xylim,
+                 bgcol=bgcol, axrect=axrect, grid=grid, xylim=xylim,
                  xnptsmax=xnptsmax, axmargin=axmargin, **kwargs)
+        self._preupdate_fcts += ['_scale_colors']
 
     def _init_base(self, **kwargs):
         """
         Separate function from __init__ for re-initialization purpose
         """
         before, after = self._extract_callit('init')
+    
         self._callmthd(before, **kwargs)
         self._init_basic_graph(**kwargs)
-        # record multi specific parameters
-        self._numbering = bool(kwargs.pop('numbering'))
-        self._nlines = int(kwargs.pop('nlines'))
-        legend = kwargs.pop('legend')
-        self._legend = int(legend) if legend is not False else False
-        self.lbls = kwargs.pop('lbls')
-        for ith in range(self.nlines):
-            self.ax.plot(0, 0,
-                         core.get_ith(kwargs.get('fmt'), ith),
-                         **core.linekwargs(kwargs, ith))
-            if self.numbering:
-                self._add_text(ith, 0, 0)
+        # record scatter specific parameters
+        self._c = kwargs.pop('c')
+        self._s = kwargs.pop('s')
+        self._cmap = kwargs.pop('cmap')
+        vmin, vmax = kwargs.pop('vmin'), kwargs.pop('vmax')
+        self._vmin = float(vmin) if vmin is not None else None
+        self._vmax = float(vmax) if vmax is not None else None
+        if vmin is None and vmax is None:
+            vmin, vmax = 0, 1  # can't define minmax yet
+        elif vmin is None:
+            vmin = vmax-self._minmini
+        elif vmax is None:
+            vmax = vmin+self._minmini
+        self._norm = matplotlibpyplotNormalize(vmin, vmax)
+        self._scatter = self.ax.scatter(0, 0, c=self._c, vmin=vmin,
+                                        vmax=vmax, s=self._s,
+                                        cmap=self._cmap,
+                                        **core.linekwargs(kwargs))
         self._scale_axes()
-        self.legend(self._legend is not False, loc=self._legend)
+        # callbacks
         self._callmthd(after, **kwargs)
         # @@@ remove that soon
         # core.INITMETHOD left for backward compatibility
@@ -128,143 +144,119 @@ class Scatter(Graph):
                   " ".format(core.INITMETHOD))
             self._callmthd(core.INITMETHOD, **kwargs)
 
-    def _add_text(self, ith, x=None, y=None):
-        """
-        to add text boxes to the graph
-        """
-        if x is None or y is None:
-            x, y = self.get_xydata(ln=ith)
-        self.ax.text(x, y, str(ith), color='w', bbox=dict(color='k',
-                                                          alpha=0.5))
-
     @property
-    def lbls(self):
-        """
-        The list of labels for the legend (len=
-        :py:func:`~joystick.graph.GraphMulti.nlines`)
-        Set to ``None`` to simply display ['L0', ..., 'Ln-1'].
-        """
-        return self._lbls
+    def vmin(self):
+        return self._vmin
 
-    @lbls.setter
-    def lbls(self, value):
+    @vmin.setter
+    def vmin(self, value):
         if value is None:
-            self._lbls = ["L"+str(i) for i in range(self.nlines)]
-        elif len(value) >= self.nlines:
-            self._lbls = list(map(str, list(value)[:self.nlines]))
+            value = self._scatter.get_array().min()
+            self._vmin = None
         else:
-            print('lbls should have size {:d}'.format(self.nlines))
-            return
-        self.legend(self._legend is not False, loc=self._legend)
+            self._vmin = float(value)
+        self._set_norm(float(value), self._norm.vmax)
 
-    def legend(self, show, lbls=[], loc=None, **kwargs):
-        """
-        Turns the legend on/off interactively
-
-        Args:
-          * show (bool): ``True`` or ``False`` whether to display
-          * lbls (None or list of str): the labels of the legend.
-            See :py:func:`~joystick.graph.GraphMulti.lbls`. Leave to
-            ``[]`` for no change in labels
-          * loc (int): the location of the legend, as in ``plt.legend``
-
-        Kwargs:
-          * Any parameter accepted by ``plt.figure.ax.legend``
-        """
-        show = bool(show)
-        if show:
-            if lbls != []:
-                self.lbls = lbls
-            loc = self._legend if loc is None else int(loc)
-            self.ax.legend(self.ax.lines, self.lbls, loc=loc)
-        else:
-            self.ax.legend_.remove()
-        self.show()
-    
     @property
-    def nlines(self):
-        """
-        The number of lines in the display
-        """
-        return self._nlines
+    def vmax(self):
+        return self._vmax
 
-    @nlines.setter
-    def nlines(self, value):
-        print("Read-only.")
-    
-    @property
-    def numbering(self):
-        """
-        Whether to display the line-boxes on the graph
-        """
-        return self._numbering
-
-    @numbering.setter
-    def numbering(self, value):
-        if self._numbering == bool(value):
-            return
-        self._numbering = bool(value)
-        if self._numbering:
-            for ith, l in enumerate(self.ax.lines):
-                self._add_text(ith)
+    @vmax.setter
+    def vmax(self, value):
+        if value is None:
+            value = self._scatter.get_array().max()
+            self._vmax = None
         else:
-            for ith in range(self.nlines):
-                self.ax.texts.pop(0)
+            self._vmax = float(value)
+        self._set_norm(self._norm.vmin, float(value))
 
-    def set_xydata(self, x, y, ln=None):
+    @property
+    def s(self):
+        return self._s
+
+    @s.setter
+    def s(self, value):
+        if not hasattr(value, '__iter__'):
+            self._s = value
+            self._scatter.set_sizes([self._s])
+
+    @property
+    def c(self):
+        return self._c
+
+    @c.setter
+    def c(self, value):
+        if not hasattr(value, '__iter__'):
+            self._c = np.asarray(value)
+            self._scatter.set_array(self._c)
+            self._scatter.update_scalarmappable()
+
+    def _set_norm(self, vmin, vmax):
+        self._norm = matplotlibpyplotNormalize(vmin, vmax)
+        self._scatter.set_norm(self._norm)
+        self._scatter.update_scalarmappable()
+
+
+    @property
+    def cmap(self):
         """
-        Sets the x and y data of the graph.
-        If ``ln`` is left ``None``, the data of all lines will be set.
-        In that case, x and y are expected to be lists (len=
-        :py:func:`~joystick.graph.GraphMulti.nlines`) of numpy 1d-vectors.
-        
-        If ``ln`` is an integer (i.e. line-index), only this line will
-        be updated x and y shall be numpy 1d-vectors.
+        The colormap of the scatter points
+        """
+        return self._cmap
 
-        For each line only the last :py:func:`~joystick.graph.GraphMulti.xnpts`
+    @cmap.setter
+    def cmap(self, value):
+        # a cm object
+        if not isinstance(value, str):
+            if hasattr(value, 'name'):
+                value = value.name
+            else:
+                print('Not a value cmap')
+                return
+        self._scatter.set_cmap(value)
+        self._scatter.update_scalarmappable()
+        self._cmap = value
+
+    def _scale_colors(self):
+        """
+        Does the color scaling
+        """
+        # None means recalculate the bound
+        if not (self._vmin is None or self._vmax is None):
+            return
+        colors = self._scatter.get_array()
+        vmin = colors.min() if self._vmin is None else self._norm.vmin
+        vmax = colors.max() if self._vmax is None else self._norm.vmax
+        self._set_norm(vmin, vmax)
+
+    def _get_xydata_minmax(self):
+        res = self._scatter.get_offsets()
+        return np.min(res[:,0]), np.max(res[:,0]), np.min(res[:,1]), np.max(res[:,1])
+
+    def get_xydata(self):
+        """
+        Returns the (x, y, c, s) data of the scatter points
+        """
+        res = self._scatter.get_offsets()
+        sz = self._scatter.get_sizes()
+        cl = self._scatter.get_array()
+        return res[:,0], res[:,1], sz, cl
+
+    def set_xydata(self, x, y, c=None, s=None):
+        """
+        Sets the x, y, c and s data of the points.
+        Only the last :py:func:`~joystick.graph.Scatter.xnpts`
         data-points will be displayed
         """
         if not self.visible:
             return
-        if ln is not None:
-            self._set_data_and_text(ith=int(ln), x=x, y=y)
-        else:
-            for ith, l in enumerate(self.ax.lines):
-                self._set_data_and_text(ith=ith, x=x[ith], y=y[ith])
-                        
-    def _set_data_and_text(self, ith, x, y):
-        """
-        set data and move text box if necessary of the ith line
-        """
+        xy = np.asarray([x,y]).T
         if self.xnpts is not None:
-            self.ax.lines[ith].set_xdata(x[-self.xnpts:])
-            self.ax.lines[ith].set_ydata(y[-self.xnpts:])
+            self._scatter.set_offsets(xy[-self.xnpts:])
+            if c is not None:
+                self._scatter.set_array(np.asarray(c)[-self.xnpts:])
+                self._scatter.update_scalarmappable()
+            if s is not None:
+                self._scatter.set_sizes(np.asarray(s)[-self.xnpts:])
         else:
-            self.ax.lines[ith].set_xdata(x)
-            self.ax.lines[ith].set_ydata(y)
-        if self.numbering:
-            idx = -self.xnpts\
-                  if (x.size >= self.xnpts and self.xnpts is not None)\
-                  else 0
-            self.ax.texts[ith].set_position((x[idx], y[idx]))
-    
-    def get_xydata(self, ln=None):
-        """
-        Returns the x and y data from all lines in the graph:
-        ([x1,x2,...], [y1,y2,...]), unless ``ln`` is an integer
-        """
-        if ln is not None:
-            return (self.ax.lines[int(ln)].get_xdata(),
-                    self.ax.lines[int(ln)].get_ydata())
-        else:
-            return ([l.get_xdata() for l in self.ax.lines],
-                    [l.get_ydata() for l in self.ax.lines])
-
-    def _get_xydata_minmax(self):
-        """
-        Just return the min-max bounds of the displayed lines
-        """
-        x, y = self.get_xydata()
-        x = np.concatenate(x)
-        y = np.concatenate(y)
-        return x.min(), x.max(), y.min(), y.max()
+            self._scatter.set_offsets(xy)
