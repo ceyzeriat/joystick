@@ -58,9 +58,9 @@ def _generate_fake_data_base(self):
     # prepare the time axis
     t = np.round(self.xdata-self._t0, 1)
     # push new data to the graph
-    self.mygraph.set_xydata1(t, self.ydata1)
-    self.mmgraph.set_xydata1([t, t], [self.ydata1, self.ydata2])
-    self.myscatter.set_xydata1(self.ydata1, self.ydata1**2, c=self.ydata1)
+    self.mygraph.set_xydata(t, self.ydata1)
+    self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata2])
+    self.myscatter.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
 
 
 def _generate_fake_image_base(self):
