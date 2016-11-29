@@ -38,7 +38,7 @@ class Graph(Frame):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, xnpts=30, fmt="ro-", bgcol='w',
                  axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
-                 xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
+                 xylim=(None, None, None, None), xnptsmax=50, axmargin=(1.1, 1.1),
                  **kwargs):
         """
         Initialises a graph-frame. Use :py:func:`~joystick.graph.Graph.set_xydata` and
@@ -78,7 +78,7 @@ class Graph(Frame):
 
         Kwargs:
           * Any non-abbreviated parameter accepted by ``figure.add_axes``
-            (eg. ``xlabel``, ``ylabel``, ``title``, aspect``) and ``plt.plot``
+            (eg. ``xlabel``, ``ylabel``, ``title``, ``aspect``) and ``plt.plot``
           * Will be passed to the optional custom methods decorated
             with :py:func:`~joystick.deco.deco_callit`
         """
@@ -124,10 +124,10 @@ class Graph(Frame):
             self._callmthd(core.INITMETHOD, **kwargs)
 
     def _init_basic_graph(self, **kwargs):
-        self.xnptsmax = int(kwargs.pop('xnptsmax'))
         self.xylim = tuple(kwargs.pop('xylim')[:4])
         self.axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
-        self.xnpts = int(kwargs.pop('xnpts'))
+        self._xnpts = int(kwargs.pop('xnpts'))
+        self._xnptsmax = max(int(kwargs.pop('xnptsmax')), self.xnpts)
         axrect = tuple(kwargs.pop('axrect')[:4])
         self._fig = core.mat.figure.Figure()
         self.ax = self._fig.add_axes(axrect[:2] + (axrect[2]-axrect[0],
@@ -228,6 +228,9 @@ class Graph(Frame):
 
     def _get_xydata_minmax(self):
         x, y = self.get_xydata()
+        # if no data on the graph, just return the current xylim
+        if (0 if x is None else x.size) == 0 or (0 if y is None else y.size) == 0:
+            return self.get_xylim()
         return np.min(x), np.max(x), np.min(y), np.max(y)
 
     def set_xylim(self, xylim=(None, None, None, None)):

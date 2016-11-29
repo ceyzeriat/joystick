@@ -87,7 +87,7 @@ class Text(Frame):
         self._kwargs = kwargs
         # call mummy init
         super(Text, self).__init__(**self._kwargs)
-        self._preupdate_fcts = ['_add_pending_lines']
+        self._preupdate_fcts = ['_clear_it', '_add_pending_lines']
         # call ya own init
         self._init_base(**self._kwargs)
 
@@ -180,11 +180,21 @@ class Text(Frame):
                               addon if mark_line else "",
                               txt.encode(encoding),
                               nl_e)])
+        if not (self.running and self._mummy_running):
+            self._add_pending_lines()
+
+    def _clear_it(self):
+        if getattr(self, '_need_for_clear', False):
+            self._text.delete('1.0', tkinter.END)
+            self._isempty = True
+        self._need_for_clear = False
 
     def clear(self):
         """
         Flushes the text in the frame
         """
-        if self.visible:
-            self._text.delete('1.0', tkinter.END)
-        self._isempty = True
+        if not self.visible:
+            return
+        self._need_for_clear = True
+        if not (self.running and self._mummy_running):
+            self._clear_it()

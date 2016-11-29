@@ -76,7 +76,7 @@ __doc__ = """Here are some useful constants:
 
 LINEKWARGS = [item[4:] \
                 for item in mat.lines.Line2D.__dict__.keys() \
-                if 'set_' in item]
+                if 'set_' in item] + ['alpha', 'label']
 
 
 TKKWARGS = ['background', 'borderwidth', 'cursor', 'exportselection', 'font',
@@ -98,6 +98,10 @@ AXKWARGS = ['adjustable', 'agg_filter', 'alpha', 'anchor', 'animated',
             'xbound', 'xlabel', 'xlim', 'xmargin', 'xscale', 'xticklabels',
             'xticks', 'ybound', 'ylabel', 'ylim', 'ymargin', 'yscale',
             'yticklabels', 'yticks', 'zorder']
+
+SCATKWARGS = [item[4:] \
+                for item in mat.collections.Collection.__dict__.keys() \
+                if 'set_' in item] + ['marker', 'verts', 'label']
 
 def cm_bounds_to_norm(cm_bounds, data=None):
     cmin = float(cm_bounds[0]) if cm_bounds[0] is not None \
@@ -130,17 +134,24 @@ def colorbar(cmap="jet", cm_bounds=(0, 1)):
     return cmap, norm, mappable
 
 
+def scatkwargs(kwargs, ith=None):
+    """
+    Returns a copy of kwargs that contains only keys existing
+    to scatter
+    """
+    return extract_kwargs(kwargs, SCATKWARGS, ith=ith)
+
 def linekwargs(kwargs, ith=None):
     """
     Returns a copy of kwargs that contains only keys existing
-    to matplotlib
+    to lines
     """
     return extract_kwargs(kwargs, LINEKWARGS, ith=ith)
 
 def axkwargs(kwargs, ith=None):
     """
     Returns a copy of kwargs that contains only keys existing
-    to matplotlib
+    to axes
     """
     return extract_kwargs(kwargs, AXKWARGS, ith=ith)
 

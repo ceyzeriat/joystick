@@ -36,6 +36,14 @@ joystick.graph module
     :undoc-members:
     :show-inheritance:
 
+joystick.graphmulti module
+--------------------------
+
+.. automodule:: joystick.graphmulti
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 joystick.image module
 ---------------------
 
@@ -48,6 +56,14 @@ joystick.joystick module
 ------------------------
 
 .. automodule:: joystick.joystick
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+joystick.scatter module
+-----------------------
+
+.. automodule:: joystick.scatter
     :members:
     :undoc-members:
     :show-inheritance:

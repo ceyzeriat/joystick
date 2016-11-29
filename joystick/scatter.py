@@ -39,7 +39,7 @@ class Scatter(Graph):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, xnpts=30, c='r', s=20,
                  bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
-                 xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
+                 xylim=(None, None, None, None), xnptsmax=50, axmargin=(1.1, 1.1),
                  cmap='gist_earth', vmin=None, vmax=None, **kwargs):
                  
         """
@@ -89,7 +89,7 @@ class Scatter(Graph):
 
         Kwargs:
           * Any non-abbreviated parameter accepted by ``figure.add_axes``
-            (eg. ``xlabel``, ``ylabel``, ``title``, aspect``) and
+            (eg. ``xlabel``, ``ylabel``, ``title``, ``aspect``) and
             ``plt.scatter``
           * Will be passed to the optional custom methods decorated
             with :py:func:`~joystick.deco.deco_callit`
@@ -110,13 +110,13 @@ class Scatter(Graph):
         Separate function from __init__ for re-initialization purpose
         """
         before, after = self._extract_callit('init')
-    
+        # callfront
         self._callmthd(before, **kwargs)
         self._init_basic_graph(**kwargs)
         # record scatter specific parameters
         self._c = kwargs.pop('c')
         self._s = kwargs.pop('s')
-        self._cmap = kwargs.pop('cmap')
+        cmap = kwargs.pop('cmap')
         vmin, vmax = kwargs.pop('vmin'), kwargs.pop('vmax')
         self._vmin = float(vmin) if vmin is not None else None
         self._vmax = float(vmax) if vmax is not None else None
@@ -127,11 +127,11 @@ class Scatter(Graph):
         elif vmax is None:
             vmax = vmin+self._minmini
         self._norm = matplotlibpyplotNormalize(vmin, vmax)
-        self._scatter = self.ax.scatter(0, 0, c=self._c, vmin=vmin,
-                                        vmax=vmax, s=self._s,
-                                        cmap=self._cmap,
-                                        **core.linekwargs(kwargs))
+        self._scatter = self.ax.scatter(0, 0, c=self._c, vmin=vmin, vmax=vmax,
+                                        s=self._s, cmap=cmap,
+                                        **core.scatkwargs(kwargs))
         self._scale_axes()
+        self.cmap = cmap
         # callbacks
         self._callmthd(after, **kwargs)
         # @@@ remove that soon
@@ -211,7 +211,7 @@ class Scatter(Graph):
             if hasattr(value, 'name'):
                 value = value.name
             else:
-                print('Not a value cmap')
+                print('Not a valid cmap')
                 return
         self._scatter.set_cmap(value)
         self._scatter.update_scalarmappable()
@@ -225,6 +225,8 @@ class Scatter(Graph):
         if not (self._vmin is None or self._vmax is None):
             return
         colors = self._scatter.get_array()
+        if colors.size == 0:
+            return
         vmin = colors.min() if self._vmin is None else self._norm.vmin
         vmax = colors.max() if self._vmax is None else self._norm.vmax
         self._set_norm(vmin, vmax)

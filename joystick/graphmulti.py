@@ -39,7 +39,7 @@ class GraphMulti(Graph):
                  screen_relative=False, xnpts=30, nlines=2, numbering=True,
                  lbls=None, legend=2, fmt=None, bgcol='w',
                  axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
-                 xylim=(0., None, 0., None), xnptsmax=50, axmargin=(1.1, 1.1),
+                 xylim=(None, None, None, None), xnptsmax=50, axmargin=(1.1, 1.1),
                   **kwargs):
         """
         Initialises a graph-frame. Use :py:func:`~joystick.graph.Graph.set_xydata` and
@@ -86,7 +86,7 @@ class GraphMulti(Graph):
 
         Kwargs:
           * Any parameter accepted by ``plt.figure.add_axes`` (eg. ``xlabel``,
-            ``ylabel``, ``title``, aspect``, etc)
+            ``ylabel``, ``title``, ``aspect``, etc)
           * Any parameter accepted by ``plt.plot`` (either a single element
             or a list of ``nlines`` elements)
           * Will be passed to the optional custom methods decorated

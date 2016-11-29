@@ -50,17 +50,17 @@ class test(jk.Joystick):
         # declared after
         # create a graph frame
         self.mygraph = self.add_frame(
-                   jk.GraphMulti(name="test", size=(500, 500), pos=(50, 50),
-                                 xnpts=15, freq_up=7, bgcol="w", nlines=2,
-                                 xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
+                    jk.GraphMulti(name="test", size=(500, 500), pos=(50, 50),
+                                  xnpts=15, freq_up=7, bgcol="w", nlines=2,
+                                  xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
         # create a text frame
         self.mytext = self.add_frame(
-                      jk.Text(name="Y-overflow", size=(500, 250),
-                              pos=(600, 50), freq_up=1))
+                    jk.Text(name="Y-overflow", size=(500, 250), pos=(600, 50),
+                            freq_up=1))
         self.myscatter = self.add_frame(
-                      jk.Scatter(name="scatter", size=(500, 500), pos=(600, 350),
-                                 xnpts=15, freq_up=7, bgcol="y",
-                                 xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
+                    jk.Scatter(name="scatter", size=(500, 500), pos=(600, 350),
+                               xnpts=15, freq_up=7, bgcol="k", cmap='Reds',
+                               s=80, xylim=(0,10,0,1), grid='w'))
 
     @_callit('before', 'start')
     def _set_t0(self):
@@ -83,6 +83,7 @@ class test(jk.Joystick):
         # check overflow for the new data point
         if new_y_data > 1:
             # send warning to the text-frame
+            self.mytext.clear()
             self.mytext.add_text('Some data bumped into the ceiling: '
                                  '{:.3f}'.format(new_y_data))
         self.ydata1 = jk.core.add_datapoint(self.ydata1,
