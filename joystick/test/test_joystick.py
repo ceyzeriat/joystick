@@ -48,8 +48,8 @@ def _generate_fake_data_base(self):
                                     xnptsmax=self.mygraph.xnptsmax)
     # concatenate data on the fake data y-axis
     self.ydata1 = core.add_datapoint(self.ydata1,
-                                    np.random.random()*1.05,
-                                    xnptsmax=self.mygraph.xnptsmax)
+                                     np.random.random()*1.05,
+                                     xnptsmax=self.mygraph.xnptsmax)
     # check overflow for the last data point added
     if self.ydata1[-1] > 1:
         # send warning to the text-frame
@@ -59,7 +59,7 @@ def _generate_fake_data_base(self):
     t = np.round(self.xdata-self._t0, 1)
     # push new data to the graph
     self.mygraph.set_xydata(t, self.ydata1)
-    self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata2])
+    self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata1**2])
     self.myscat.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
 
 
@@ -98,7 +98,6 @@ class test(Joystick):
         self._t0 = time.time()
         self.xdata = np.array([])
         self.ydata1 = np.array([])
-        self.ydata2 = np.array([])
         _build_frames_base(self)        
 
     @_infinite_loop(wait_time=1)
@@ -118,7 +117,6 @@ class test2(Joystick):
     def _init_data(self, *args, **kwargs):
         self.xdata = np.array([])
         self.ydata1 = np.array([])
-        self.ydata2 = np.array([])
 
     @_callit('after', 'init')
     def _build_frames(self, *args, **kwargs):
@@ -159,7 +157,6 @@ def _hophop():
     t.myscat.vmin = None
     t.myscat.vmax = None
     t.myscat.cmap = 'jet'
-
     t.stop()
     t.exit()
 
