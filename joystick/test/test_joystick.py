@@ -47,20 +47,20 @@ def _generate_fake_data_base(self):
                                     time.time(),
                                     xnptsmax=self.mygraph.xnptsmax)
     # concatenate data on the fake data y-axis
-    self.ydata = core.add_datapoint(self.ydata,
+    self.ydata1 = core.add_datapoint(self.ydata1,
                                     np.random.random()*1.05,
                                     xnptsmax=self.mygraph.xnptsmax)
     # check overflow for the last data point added
-    if self.ydata[-1] > 1:
+    if self.ydata1[-1] > 1:
         # send warning to the text-frame
         self.mytext.add_text('Some data bumped into the ceiling: ' \
-                             '{:.3f}'.format(self.ydata[-1]))
+                             '{:.3f}'.format(self.ydata1[-1]))
     # prepare the time axis
     t = np.round(self.xdata-self._t0, 1)
     # push new data to the graph
-    self.mygraph.set_xydata(t, self.ydata1)
-    self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata2])
-    self.myscatter.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
+    self.mygraph.set_xydata1(t, self.ydata1)
+    self.mmgraph.set_xydata1([t, t], [self.ydata1, self.ydata2])
+    self.myscatter.set_xydata1(self.ydata1, self.ydata1**2, c=self.ydata1)
 
 
 def _generate_fake_image_base(self):
