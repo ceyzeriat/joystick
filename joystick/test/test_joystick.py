@@ -86,7 +86,7 @@ def _build_frames_base(self):
                           axrect=(0,0,1,1), freq_up=3,
                           cm_bounds = (0, 1)))
     self.myscat = self.add_frame(
-                    jk.Scatter(name="scatter", size=(500, 500), pos=(600, 350),
+                    Scatter(name="scatter", size=(500, 500), pos=(600, 350),
                                xnpts=15, freq_up=7, bgcol="k", cmap='Reds',
                                s=80, xylim=(0,10,0,1), grid='w'))
 
