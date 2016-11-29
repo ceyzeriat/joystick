@@ -60,6 +60,7 @@ def _generate_fake_data_base(self):
     # push new data to the graph
     self.mygraph.set_xydata(t, self.ydata1)
     self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata2])
+    self.myscatter.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
 
 
 def _generate_fake_image_base(self):
@@ -84,6 +85,10 @@ def _build_frames_base(self):
                     Image(name="Image", size=(100, 100), pos=(50, 600),
                           axrect=(0,0,1,1), freq_up=3,
                           cm_bounds = (0, 1)))
+    self.myscat = self.add_frame(
+                    jk.Scatter(name="scatter", size=(500, 500), pos=(600, 350),
+                               xnpts=15, freq_up=7, bgcol="k", cmap='Reds',
+                               s=80, xylim=(0,10,0,1), grid='w'))
 
 
 class test(Joystick):
@@ -151,6 +156,10 @@ def _hophop():
     t.mmgraph.legend(show=False)
     t.mmgraph.numbering = True
     t.mmgraph.numbering = False
+    t.myscat.vmin = None
+    t.myscat.vmax = None
+    t.myscat.cmap = 'jet'
+
     t.stop()
     t.exit()
 
