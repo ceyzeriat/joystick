@@ -1,12 +1,8 @@
 0.3.1 (2016-11-29)
 ++++++++++++++++++
 
-- fixed bug: cmap of scatter
-- added taking into account scatter kwargs
-- fixed bug: xnptsmax cannot be smaller than xnpts
-- changed default value of xylim for graph, multigraph and scatter frames to (None, None, None, None)
-- fixed bug: xylim auto-determination when no data is on the graph
-- 
+- fixed bug: increased interactivity on graphs when not running
+- fixed bug on xylim of graph, multigraph and scatter
 
 0.3.0 (2016-11-28)
 ++++++++++++++++++

@@ -125,7 +125,7 @@ class GraphMulti(Graph):
                          **core.linekwargs(kwargs, ith))
             if self.numbering:
                 self._add_text(ith, 0, 0)
-        self._scale_axes()
+        self._scale_axes(force=True)
         self.legend(self._legend is not False, loc=self._legend)
         self._callmthd(after, **kwargs)
         # @@@ remove that soon
@@ -253,17 +253,17 @@ class GraphMulti(Graph):
             self.ax.lines[ith].set_ydata(y)
         if self.numbering:
             idx = -self.xnpts\
-                  if (x.size >= self.xnpts and self.xnpts is not None)\
+                  if (np.size(x) >= self.xnpts and self.xnpts is not None)\
                   else 0
             xybox= (x[idx], y[idx])\
-                   if x.size > 0 and y.size > 0\
+                   if np.size(x) > 0 and np.size(y) > 0\
                    else (0, 0)
             self.ax.texts[ith].set_position(xybox)
     
     def get_xydata(self, ln=None):
         """
         Returns the x and y data from all lines in the graph:
-        ([x1,x2,...], [y1,y2,...]), unless ``ln`` is an integer
+        ([x0,x1,...], [y0,y1,...]), unless ``ln`` is an integer
         """
         if ln is not None:
             return (self.ax.lines[int(ln)].get_xdata(),
@@ -277,6 +277,8 @@ class GraphMulti(Graph):
         Just return the min-max bounds of the displayed lines
         """
         x, y = self.get_xydata()
+        if (0 if x is None else np.size(x)) == 0 or (0 if y is None else np.size(y)) == 0:
+            return self.get_xylim()
         x = np.concatenate(x)
         y = np.concatenate(y)
         return x.min(), x.max(), y.min(), y.max()

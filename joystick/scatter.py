@@ -130,7 +130,7 @@ class Scatter(Graph):
         self._scatter = self.ax.scatter(0, 0, c=self._c, vmin=vmin, vmax=vmax,
                                         s=self._s, cmap=cmap,
                                         **core.scatkwargs(kwargs))
-        self._scale_axes()
+        self._scale_axes(force=True)
         self.cmap = cmap
         # callbacks
         self._callmthd(after, **kwargs)
@@ -156,6 +156,8 @@ class Scatter(Graph):
         else:
             self._vmin = float(value)
         self._set_norm(float(value), self._norm.vmax)
+        if not (self.running and self._mummy_running):
+            self.show()
 
     @property
     def vmax(self):
@@ -169,6 +171,8 @@ class Scatter(Graph):
         else:
             self._vmax = float(value)
         self._set_norm(self._norm.vmin, float(value))
+        if not (self.running and self._mummy_running):
+            self.show()
 
     @property
     def s(self):
@@ -179,6 +183,8 @@ class Scatter(Graph):
         if not hasattr(value, '__iter__'):
             self._s = value
             self._scatter.set_sizes([self._s])
+        if not (self.running and self._mummy_running):
+            self.show()
 
     @property
     def c(self):
@@ -190,12 +196,13 @@ class Scatter(Graph):
             self._c = np.asarray(value)
             self._scatter.set_array(self._c)
             self._scatter.update_scalarmappable()
+        if not (self.running and self._mummy_running):
+            self.show()
 
     def _set_norm(self, vmin, vmax):
         self._norm = matplotlibpyplotNormalize(vmin, vmax)
         self._scatter.set_norm(self._norm)
         self._scatter.update_scalarmappable()
-
 
     @property
     def cmap(self):
@@ -216,6 +223,8 @@ class Scatter(Graph):
         self._scatter.set_cmap(value)
         self._scatter.update_scalarmappable()
         self._cmap = value
+        if not (self.running and self._mummy_running):
+            self.show()
 
     def _scale_colors(self):
         """
@@ -225,7 +234,7 @@ class Scatter(Graph):
         if not (self._vmin is None or self._vmax is None):
             return
         colors = self._scatter.get_array()
-        if colors.size == 0:
+        if (np.size(colors) if colors is not None else 0) == 0:
             return
         vmin = colors.min() if self._vmin is None else self._norm.vmin
         vmax = colors.max() if self._vmax is None else self._norm.vmax
@@ -233,6 +242,8 @@ class Scatter(Graph):
 
     def _get_xydata_minmax(self):
         res = self._scatter.get_offsets()
+        if (0 if res is None else np.size(res)) == 0:
+            return self.get_xylim()
         return np.min(res[:,0]), np.max(res[:,0]), np.min(res[:,1]), np.max(res[:,1])
 
     def get_xydata(self):

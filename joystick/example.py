@@ -52,7 +52,7 @@ class test(jk.Joystick):
         self.mygraph = self.add_frame(
                     jk.GraphMulti(name="test", size=(500, 500), pos=(50, 50),
                                   xnpts=15, freq_up=7, bgcol="w", nlines=2,
-                                  xylim=(0,10,0,1), xlabel='t', ylabel='rnd'))
+                                  xlabel='t', ylabel='rnd'))
         # create a text frame
         self.mytext = self.add_frame(
                     jk.Text(name="Y-overflow", size=(500, 250), pos=(600, 50),
@@ -75,30 +75,24 @@ class test(jk.Joystick):
         # It gets new data (fake random data) and pushes it to the frames.
         # concatenate data on the time x-axis
         new_x_data = time.time()
-        self.xdata = jk.core.add_datapoint(self.xdata,
-                                           new_x_data,
-                                           xnptsmax=self.mygraph.xnptsmax)
+        self.xdata = jk.add_datapoint(self.xdata,
+                                      new_x_data,
+                                      xnptsmax=self.mygraph.xnptsmax)
         # concatenate data on the fake data y-axis
         new_y_data = np.random.random()*1.05
         # check overflow for the new data point
         if new_y_data > 1:
             # send warning to the text-frame
-            self.mytext.clear()
             self.mytext.add_text('Some data bumped into the ceiling: '
                                  '{:.3f}'.format(new_y_data))
-        self.ydata1 = jk.core.add_datapoint(self.ydata1,
-                                            new_y_data,
-                                            xnptsmax=self.mygraph.xnptsmax)
-        self.ydata2 = jk.core.add_datapoint(self.ydata2,
-                                            new_y_data**2,
-                                            xnptsmax=self.mygraph.xnptsmax)
+        self.ydata1 = jk.add_datapoint(self.ydata1,
+                                       new_y_data,
+                                       xnptsmax=self.mygraph.xnptsmax)
         # prepare the time axis
         t = np.round(self.xdata-self._t0, 1)
         # push new data to the graph
-        self.mygraph.set_xydata([t, t[slice(0, -1, 3)]],
-                                [self.ydata1, self.ydata2[slice(0, -1, 3)]])
-        self.myscatter.set_xydata(self.ydata1, self.ydata2, c=self.ydata1)
-
+        self.mygraph.set_xydata([t, t], [self.ydata1, 1-self.ydata1**2])
+        self.myscatter.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
 
     @_callit('before', 'exit')
     def exit_warning(self):
@@ -120,16 +114,14 @@ t.myscatter.xylim = (0,1,0,1)
 t.mygraph.numbering = False
 t.mygraph.lbls = ['rnd', 'rnd**2']
 
+t.myscatter.cmap = 'gist_earth'
 
+t.stop()
 
+t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
 
+t.start()
 
-#t.stop()
+t.stop()
 
-#t.mygraph.reinit(bgcol='w', axrect=(0,0,1,1), xylim=(None, None, 0, 1))
-
-#t.start()
-
-#t.stop()
-
-#t.exit()
+t.exit()

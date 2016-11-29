@@ -37,7 +37,7 @@ import time
 import numpy as np
 
 
-__all__ = []
+__all__ = ['add_datapoint']
 
 
 # @@@ remove that soon

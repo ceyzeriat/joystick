@@ -111,7 +111,7 @@ class Graph(Frame):
         self._callmthd(before, **kwargs)
         self._init_basic_graph(**kwargs)
         self.ax.plot(0, 0, kwargs.pop('fmt'), **core.linekwargs(kwargs))
-        self._scale_axes()
+        self._scale_axes(force=True)
         self._callmthd(after, **kwargs)
         # @@@ remove that soon
         # core.INITMETHOD left for backward compatibility
@@ -124,8 +124,8 @@ class Graph(Frame):
             self._callmthd(core.INITMETHOD, **kwargs)
 
     def _init_basic_graph(self, **kwargs):
-        self.xylim = tuple(kwargs.pop('xylim')[:4])
-        self.axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
+        self._xylim = tuple(kwargs.pop('xylim')[:4])
+        self._axmargin = tuple(map(abs, kwargs.pop('axmargin')[:2]))
         self._xnpts = int(kwargs.pop('xnpts'))
         self._xnptsmax = max(int(kwargs.pop('xnptsmax')), self.xnpts)
         axrect = tuple(kwargs.pop('axrect')[:4])
@@ -145,6 +145,9 @@ class Graph(Frame):
         grid = kwargs.pop('grid')
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
+
+    def add_datapoint(self, data1, data2):
+        return jk.core.add_datapoint(data1, data2, xnptsmax=self.xnptsmax)
 
     def reinit(self, **kwargs):
         """
@@ -203,7 +206,7 @@ class Graph(Frame):
             self._xnpts = int(value)
         else:
             print("{}Invalid value. Must be 1--{}{}" \
-            .format(core.font.red, self.xnptsmax, core.font.normal))        
+            .format(core.font.red, self.xnptsmax, core.font.normal))
 
     def set_xydata(self, x, y):
         """
@@ -230,19 +233,51 @@ class Graph(Frame):
         x, y = self.get_xydata()
         # if no data on the graph, just return the current xylim
         if (0 if x is None else x.size) == 0 or (0 if y is None else y.size) == 0:
-            return self.get_xylim()
+            return self.get_xylim_graph()
         return np.min(x), np.max(x), np.min(y), np.max(y)
+
+    @property
+    def axmargin(self):
+        return self._axmargin
+
+    @axmargin.setter
+    def axmargin(self, value):
+        if len(value) != 2:
+            print("Wrong size for axmargin, should be 2")
+        else:
+            self._axmargin = list(map(float, value))
+            if not (self.running and self._mummy_running):
+                self.show()
+
+    @property
+    def xylim(self):
+        return self._xylim
+
+    @xylim.setter
+    def xylim(self, value):
+        if len(value) != 4:
+            print("Wrong size for xylim, should be 4")
+        else:
+            self._xylim = [float(item) if item is not None else None\
+                           for item in value]
+            self._scale_axes(force=True)
+            if not (self.running and self._mummy_running):
+                self.show()
 
     def set_xylim(self, xylim=(None, None, None, None)):
         """
-        Sets the (xmin, xmax, ymin, ymax) limits of the graph.
-        Set one or several values to ``None`` to auto-adjust the limits
-        of the graph to its x- or y-data.
+        DEPRECATED, set `xylim` property instead
         """
+        self._set_xylim(xylim=xylim)
+
+    def _set_xylim(self, xylim=(None, None, None, None)):
         if not self.visible:
             return
-        xmin, xmax, ymin, ymax = xylim
-        xmin_o, xmax_o, ymin_o, ymax_o = self.get_xylim()
+        if len(xylim) != 4:
+            print("Wrong xylim size, should be 4")
+            return
+        xmin, xmax, ymin, ymax = xylim[:4]
+        xmin_o, xmax_o, ymin_o, ymax_o = self.get_xylim_graph()
         xmin = xmin_o if xmin is None else float(xmin)
         xmax = xmax_o if xmax is None else float(xmax)
         ymin = ymin_o if ymin is None else float(ymin)
@@ -254,18 +289,25 @@ class Graph(Frame):
 
     def get_xylim(self):
         """
+        DEPRECATED, use `get_xylim_graph` method instead
+        """
+        return self.get_xylim_graph()
+
+    def get_xylim_graph(self):
+        """
         Returns the (xmin, xmax, ymin, ymax) limits of the graph
         """
         if self.visible:
             return self.ax.get_xlim() + self.ax.get_ylim()
 
-    def _scale_axes(self):
+    def _scale_axes(self, force=False):
         """
-        Does the axes scaling
+        Does the axes scaling given the xylim property
         """
         # None means recalculate the bound
-        xmin, xmax, ymin, ymax = self.xylim
-        if xmin is None and xmax is None and ymin is None and ymax is None:
+        xmin, xmax, ymin, ymax = self.xylim[:4]
+        if not (xmin is None or xmax is None
+                or ymin is None or ymax is None or force):
             return
         xmin_f, xmax_f, ymin_f, ymax_f = self._get_xydata_minmax()
         xmin_f = xmin_f if xmin is None else xmin
@@ -284,4 +326,4 @@ class Graph(Frame):
                 ymin_f -= dy
             if ymax is None:
                 ymax_f += dy
-        self.set_xylim((xmin_f, xmax_f, ymin_f, ymax_f))
+        self._set_xylim((xmin_f, xmax_f, ymin_f, ymax_f))
