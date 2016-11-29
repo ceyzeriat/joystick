@@ -60,7 +60,7 @@ def _generate_fake_data_base(self):
     # push new data to the graph
     self.mygraph.set_xydata(t, self.ydata1)
     self.mmgraph.set_xydata([t, t], [self.ydata1, self.ydata2])
-    self.myscatter.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
+    self.myscat.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
 
 
 def _generate_fake_image_base(self):
