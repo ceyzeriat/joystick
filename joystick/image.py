@@ -114,15 +114,6 @@ class Image(Frame):
             self.ax.grid(color=grid, lw=1)
         self.reset_image(data=[[0, 0],[0, 0]], **kwargs)
         self._callmthd(after, **kwargs)
-        # @@@ remove that soon
-        # core.INITMETHOD left for backward compatibility
-        if core.INITMETHOD not in after \
-            and core.INITMETHOD not in before \
-            and hasattr(self, core.INITMETHOD):
-            print("DEPRECATION WARNING: You should add the decorator " \
-                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
-                  " ".format(core.INITMETHOD))
-            self._callmthd(core.INITMETHOD, **kwargs)
 
     @property
     def cmap(self):

@@ -1,3 +1,10 @@
+0.3.2 (2017-05-23)
+++++++++++++++++++
+
+- Removed the usage of "_init" and "_update"
+- GraphMulti numbering shows labels if lbls is not None
+
+
 0.3.1 (2016-11-29)
 ++++++++++++++++++
 

@@ -40,20 +40,10 @@ import numpy as np
 __all__ = ['add_datapoint']
 
 
-# @@@ remove that soon
-# la méthode d'initialisation des graphes
-# DEPRECATED
-INITMETHOD = "_init"
-
 # available methods for callit decoration in Joystick class
 CALLIT_JOYSTICK_METH = ['init', 'start', 'stop', 'exit', 'add_frame']
 
 CALLIT_FRAME_METH = ['init', 'start', 'stop', 'exit', 'update']
-
-# @@@ remove that soon
-# la méthode de mise à jour des graphes
-# DEPRECATED
-UPDATEMETHOD = "_update"
 
 CALLITDECO = "_callit"
 INFINITELOOPDECO = "_infinite_loop"

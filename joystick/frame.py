@@ -91,13 +91,6 @@ class Frame(object):
             size = tuple(np.round(np.array(size) * (w, h)).astype(int))
         self._window.geometry("{}x{}+{}+{}".format(*(size + pos)))
         self._callmthd(after, **kwargs)
-        # @@@ remove that soon
-        # core.INITMETHOD left for backward compatibility
-        if core.INITMETHOD not in after and hasattr(self, core.INITMETHOD):
-            print("DEPRECATION WARNING: You should add the decorator " \
-                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
-                  " ".format(core.INITMETHOD))
-            self._callmthd(core.INITMETHOD, **kwargs)
 
     @property
     def visible(self):
@@ -183,15 +176,6 @@ class Frame(object):
             self._callmthd(before)
             self._callmthd(self._preupdate_fcts)
             self._callmthd(after)
-            # @@@ remove that soon
-            # core.UPDATEMETHOD left for backward compatibility
-            if core.UPDATEMETHOD not in after \
-                and core.UPDATEMETHOD not in before \
-                and hasattr(self, core.UPDATEMETHOD):
-                print("DEPRECATION WARNING: You should add the decorator " \
-                  "`@_callit('after', 'update')` on `{}`. Refer to example.py" \
-                  " ".format(core.UPDATEMETHOD))
-                self._callmthd(core.UPDATEMETHOD)
             self.show()
 
     def start(self, **kwargs):

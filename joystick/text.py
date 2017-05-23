@@ -114,15 +114,6 @@ class Text(Frame):
         self._text.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
         self._add_pending_lines()
         self._callmthd(after, **kwargs)
-        # @@@ remove that soon
-        # core.INITMETHOD left for backward compatibility
-        if core.INITMETHOD not in after \
-            and core.INITMETHOD not in before \
-            and hasattr(self, core.INITMETHOD):
-            print("DEPRECATION WARNING: You should add the decorator " \
-                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
-                  " ".format(core.INITMETHOD))
-            self._callmthd(core.INITMETHOD, **kwargs)
 
     def reinit(self, **kwargs):
         """
@@ -180,8 +171,6 @@ class Text(Frame):
                               addon if mark_line else "",
                               txt.encode(encoding),
                               nl_e)])
-        if not (self.running and self._mummy_running):
-            self._add_pending_lines()
 
     def _clear_it(self):
         if getattr(self, '_need_for_clear', False):

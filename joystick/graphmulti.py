@@ -61,8 +61,8 @@ class GraphMulti(Graph):
           * xnpts (int or None) [optional]: the number of data points to be
             plotted. If ``None``, no limit is applied.
           * nlines (int): the number of lines in the frame
-          * numbering (bool) [optional]: whether to display the index of
-            the lines near the left-most data-point
+          * numbering (bool) [optional]: whether to display the index (or
+            labels) of the lines near the left-most data-point
           * lbls (list of str) [optional]: the labels to display in the
             legend. Default ``None`` is equivalent to ``['L0', ..., 'Ln-1']``
           * legend (int or False) [optional]: if ``False``: no legend, else
@@ -128,15 +128,6 @@ class GraphMulti(Graph):
         self._scale_axes(force=True)
         self.legend(self._legend is not False, loc=self._legend)
         self._callmthd(after, **kwargs)
-        # @@@ remove that soon
-        # core.INITMETHOD left for backward compatibility
-        if core.INITMETHOD not in after \
-            and core.INITMETHOD not in before \
-            and hasattr(self, core.INITMETHOD):
-            print("DEPRECATION WARNING: You should add the decorator " \
-                  "`@_callit('after', 'init')` on `{}`. Refer to example.py" \
-                  " ".format(core.INITMETHOD))
-            self._callmthd(core.INITMETHOD, **kwargs)
 
     def _add_text(self, ith, x=None, y=None):
         """
@@ -144,7 +135,8 @@ class GraphMulti(Graph):
         """
         if x is None or y is None:
             x, y = self.get_xydata(ln=ith)
-        self.ax.text(x, y, str(ith), color='w', bbox=dict(color='k', alpha=0.5))
+        self.ax.text(x, y, self.lbls[ith], color='w',
+                        bbox=dict(color='k', alpha=0.5))
 
     @property
     def lbls(self):
