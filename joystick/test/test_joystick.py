@@ -90,26 +90,7 @@ def _build_frames_base(self):
                                xnpts=15, freq_up=7, bgcol="k", cmap='Reds',
                                s=80, xylim=(0,10,0,1), grid='w'))
 
-
 class test(Joystick):
-    _infinite_loop = deco_infinite_loop()
-
-    def _init(self, *args, **kwargs):
-        self._t0 = time.time()
-        self.xdata = np.array([])
-        self.ydata1 = np.array([])
-        _build_frames_base(self)        
-
-    @_infinite_loop(wait_time=1)
-    def _generate_fake_data(self):
-        _generate_fake_data_base(self)
-
-    @_infinite_loop(wait_time=5)
-    def _generate_fake_image(self):
-        _generate_fake_image_base(self)
-
-
-class test2(Joystick):
     _infinite_loop = deco_infinite_loop()
     _callit = deco_callit()
 
@@ -134,8 +115,12 @@ class test2(Joystick):
     def _generate_fake_image(self):
         _generate_fake_image_base(self)
 
+def test_create():
+    t = test()
+    time.sleep(1)
+    t.exit()
 
-def _hophop():
+def test_play():
     t = test()
     t.start()
     time.sleep(1)
@@ -159,21 +144,3 @@ def _hophop():
     t.myscat.cmap = 'jet'
     t.stop()
     t.exit()
-
-def _hophophop():
-    t = test()
-    time.sleep(1)
-    t.exit()
-
-
-def testdeprecated_create():
-    _hophophop()
-
-def testdeprecated_play():
-    _hophop()
-
-def test_create():
-    _hophophop()
-
-def test_play():
-    _hophop()

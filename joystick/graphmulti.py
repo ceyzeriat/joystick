@@ -178,7 +178,7 @@ class GraphMulti(Graph):
                 self.lbls = lbls
             loc = self._legend if loc is None else int(loc)
             self.ax.legend(self.ax.lines, self.lbls, loc=loc)
-        else:
+        elif self.ax.legend_ is not None:
             self.ax.legend_.remove()
         self.show()
     
