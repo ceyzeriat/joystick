@@ -40,7 +40,8 @@ class Image(Frame):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, background="black", foreground='green',
                  cmap='gist_earth', cm_bounds=(None, None), unitperpx=1.,
-                 axrect=(0.1, 0.1, 0.9, 0.9), grid=None, **kwargs):
+                 axrect=(0.1, 0.1, 0.9, 0.9), grid=None, centerorig=True,
+                 **kwargs):
         """
         Initialises an image-frame.
 
@@ -63,6 +64,8 @@ class Image(Frame):
             as in ``plt.figure.add_axes(rect=(l,b,w,h))``
           * grid (color or None) [optional]: the grid color, or no grid
             if ``None``
+          * centerorig (bool) [optional]: if ``True`` the coordinates origin
+            will be placed in the center of the image
 
         Kwargs:
           * aspect: see ``plt.imshow``, default 'auto'
@@ -83,6 +86,7 @@ class Image(Frame):
         kwargs['unitperpx'] = unitperpx
         kwargs['axrect'] = axrect
         kwargs['grid'] = grid
+        kwargs['centerorig'] = centerorig
         self._kwargs = kwargs
         # call mummy init
         super(Image, self).__init__(**self._kwargs)
@@ -164,10 +168,14 @@ class Image(Frame):
             if key not in kwargs.keys():
                 kwargs[key] = v
         self.cmap = self._kwargs.get('cmap')
+        self.centerorig = self._kwargs.get('centerorig')
         self._set_norm(cm_bounds=kwargs.get('cm_bounds'), data=data)
-        unitperpx = float(kwargs.get('unitperpx'))
-        extent = np.asarray(np.shape(data))*unitperpx*0.5
-        extent = [-extent[1], extent[1], -extent[0], extent[0]]
+        if self.centerorig:
+            unitperpx = float(kwargs.get('unitperpx'))
+            extent = np.asarray(np.shape(data))*unitperpx*0.5
+            extent = [-extent[1], extent[1], -extent[0], extent[0]]
+        else:
+            extent = None
         self._img = self.ax.imshow(data, cmap=self._cmap, norm=self._norm,
                                    origin=kwargs.get('origin', 'lower'),
                                    aspect=kwargs.get('aspect', 'auto'),
@@ -210,7 +218,7 @@ class Image(Frame):
 
     def get_data(self):
         """
-        Returns the image.
+        Returns the image
         """
         if self.visible and self._everset:
             return self._img.get_array().data

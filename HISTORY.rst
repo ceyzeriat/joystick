@@ -1,3 +1,11 @@
+0.3.4 (2017-XXXXX)
+++++++++++++++++++
+
+- Deprecation warning matplotlib
+- Fixed bug GraphMulti when legend=False
+- Added centerorig argument in Image
+
+
 0.3.2 (2017-05-23)
 ++++++++++++++++++
 
@@ -11,6 +19,7 @@
 - fixed bug: increased interactivity on graphs when not running
 - fixed bug on xylim of graph, multigraph and scatter
 
+
 0.3.0 (2016-11-28)
 ++++++++++++++++++
 
@@ -22,11 +31,13 @@
 - Added the possibility to use ax-related kwargs in all graph-frames
 - Allowed xnpts and xnptsmax = None to apply no limit on the amount data plotted
 
+
 0.1.4 (2016-10-14)
 ++++++++++++++++++
 
 - Added image frames
 - Added auto scroll-down on a text-frame when showing text in chronological order (rev=False)
+
 
 0.1.0 (2016-09-26)
 ++++++++++++++++++

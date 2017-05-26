@@ -132,7 +132,7 @@ class Graph(Frame):
         self._canvas._tkcanvas.pack(side=tkinter.TOP,
                                     fill=tkinter.BOTH,
                                     expand=True)
-        self.ax.set_axis_bgcolor(kwargs.pop('bgcol'))
+        self.ax.set_facecolor(kwargs.pop('bgcol'))
         grid = kwargs.pop('grid')
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
