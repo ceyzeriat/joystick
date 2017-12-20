@@ -138,7 +138,6 @@ class Image(ColorbarManager, Frame):
     def cm_bounds(self, value):
         print("DEPRECATED, use `vmin` and `vmax` attribute instead")
         self._set_norm(vmin=value[0], vmax=vmax[1])
-        self._update_scalarmappable()
 
     def reset_image(self, data=None, **kwargs):
         """

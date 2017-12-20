@@ -107,7 +107,8 @@ class ColorbarManager(object):
         self._plot.set_norm(self._norm)
 
     def _update_scalarmappable(self):
-        self._plot.update_scalarmappable()
+        if hasattr(self._plot, 'update_scalarmappable'):
+            self._plot.update_scalarmappable()
 
     @property
     def cmap(self):
