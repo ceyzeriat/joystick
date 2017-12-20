@@ -40,8 +40,7 @@ class test(jk.Joystick):
         # Function automatically called at initialization, thanks to the
         # decorator
         self.xdata = np.array([])  # time x-axis
-        self.ydata1 = np.array([])  # fake data y-axis
-        self.ydata2 = np.array([])  # fake data y-axis
+        self.ydata = np.array([])  # fake data y-axis
 
     @_callit('after', 'init')
     def _build_frames(self, *args, **kwargs):
@@ -75,9 +74,8 @@ class test(jk.Joystick):
         # It gets new data (fake random data) and pushes it to the frames.
         # concatenate data on the time x-axis
         new_x_data = time.time()
-        self.xdata = jk.add_datapoint(self.xdata,
-                                      new_x_data,
-                                      xnptsmax=self.mygraph.xnptsmax)
+        # use method to automatically clip
+        self.xdata = self.mygraph.add_datapoint(self.xdata, new_x_data)
         # concatenate data on the fake data y-axis
         new_y_data = np.random.random()*1.05
         # check overflow for the new data point
@@ -85,14 +83,12 @@ class test(jk.Joystick):
             # send warning to the text-frame
             self.mytext.add_text('Some data bumped into the ceiling: '
                                  '{:.3f}'.format(new_y_data))
-        self.ydata1 = jk.add_datapoint(self.ydata1,
-                                       new_y_data,
-                                       xnptsmax=self.mygraph.xnptsmax)
+        self.ydata = self.mygraph.add_datapoint(self.ydata, new_y_data)
         # prepare the time axis
         t = np.round(self.xdata-self._t0, 1)
         # push new data to the graph
-        self.mygraph.set_xydata([t, t], [self.ydata1, 1-self.ydata1**2])
-        self.myscatter.set_xydata(self.ydata1, self.ydata1**2, c=self.ydata1)
+        self.mygraph.set_xydata([t, t], [self.ydata, 1-self.ydata**2])
+        self.myscatter.set_xydata(self.ydata, self.ydata**2, c=self.ydata)
 
     @_callit('before', 'exit')
     def exit_warning(self):

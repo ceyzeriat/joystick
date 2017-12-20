@@ -62,6 +62,7 @@ class Frame(object):
         kwargs['size'] = size
         kwargs['screen_relative'] = screen_relative
         self._kwargs = kwargs
+        super(Frame, self).__init__()
         # main simu not running
         self._mummy_running = False
         self._preupdate_fcts = []

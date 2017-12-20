@@ -25,17 +25,15 @@
 ###############################################################################
 
 from . import core
-tkinter = core.tkinter
-FigureCanvasTkAgg = core.mat.backends.backend_tkagg.FigureCanvasTkAgg
 np = core.np
-matplotlibpyplotNormalize = core.matplotlibpyplotNormalize
 from .graph import Graph
+from .colorbarmanager import ColorbarManager
 
 
 __all__ = ['Scatter']
 
 
-class Scatter(Graph):
+class Scatter(ColorbarManager, Graph):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, xnpts=30, c='r', s=20,
                  bgcol='w', axrect=(0.1, 0.1, 0.9, 0.9), grid='k',
@@ -99,10 +97,11 @@ class Scatter(Graph):
         kwargs['cmap'] = cmap
         kwargs['vmin'] = vmin
         kwargs['vmax'] = vmax
+        self._kwargs = kwargs
         super(Scatter, self).__init__(name=name, freq_up=freq_up, pos=pos,
                  size=size, screen_relative=screen_relative, xnpts=xnpts,
                  bgcol=bgcol, axrect=axrect, grid=grid, xylim=xylim,
-                 xnptsmax=xnptsmax, axmargin=axmargin, **kwargs)
+                 xnptsmax=xnptsmax, axmargin=axmargin, **self._kwargs)
         self._preupdate_fcts += ['_scale_colors']
 
     def _init_base(self, **kwargs):
@@ -116,139 +115,76 @@ class Scatter(Graph):
         # record scatter specific parameters
         self._c = kwargs.pop('c')
         self._s = kwargs.pop('s')
-        cmap = kwargs.pop('cmap')
-        vmin, vmax = kwargs.pop('vmin'), kwargs.pop('vmax')
-        self._vmin = float(vmin) if vmin is not None else None
-        self._vmax = float(vmax) if vmax is not None else None
-        if vmin is None and vmax is None:
-            vmin, vmax = 0, 1  # can't define minmax yet
-        elif vmin is None:
-            vmin = vmax-self._minmini
-        elif vmax is None:
-            vmax = vmin+self._minmini
-        self._norm = matplotlibpyplotNormalize(vmin, vmax)
-        self._scatter = self.ax.scatter(0, 0, c=self._c, vmin=vmin, vmax=vmax,
-                                        s=self._s, cmap=cmap,
+        self._plot = self.ax.scatter(0, 0, c=self._c, vmin=self.vmin,
+                                        vmax=self.vmax, s=self._s,
+                                        cmap=self.cmap,
                                         **core.scatkwargs(kwargs))
+        self._reset_colorbar(**kwargs)
         self._scale_axes(force=True)
-        self.cmap = cmap
         # callbacks
         self._callmthd(after, **kwargs)
 
     @property
-    def vmin(self):
-        return self._vmin
-
-    @vmin.setter
-    def vmin(self, value):
-        if value is None:
-            value = self._scatter.get_array().min()
-            self._vmin = None
-        else:
-            self._vmin = float(value)
-        self._set_norm(float(value), self._norm.vmax)
-        if not (self.running and self._mummy_running):
-            self.show()
-
-    @property
-    def vmax(self):
-        return self._vmax
-
-    @vmax.setter
-    def vmax(self, value):
-        if value is None:
-            value = self._scatter.get_array().max()
-            self._vmax = None
-        else:
-            self._vmax = float(value)
-        self._set_norm(self._norm.vmin, float(value))
-        if not (self.running and self._mummy_running):
-            self.show()
-
-    @property
     def s(self):
+        """
+        Size attribute of scatter markers
+        """
         return self._s
 
     @s.setter
     def s(self, value):
         if not hasattr(value, '__iter__'):
             self._s = value
-            self._scatter.set_sizes([self._s])
+            self._plot.set_sizes([self._s])
         if not (self.running and self._mummy_running):
             self.show()
 
     @property
     def c(self):
+        """
+        Color attribute of scatter markers
+        """
         return self._c
 
     @c.setter
     def c(self, value):
         if not hasattr(value, '__iter__'):
             self._c = np.asarray(value)
-            self._scatter.set_array(self._c)
-            self._scatter.update_scalarmappable()
+            self._plot.set_array(self._c)
+            self._update_scalarmappable()
         if not (self.running and self._mummy_running):
             self.show()
-
-    def _set_norm(self, vmin, vmax):
-        self._norm = matplotlibpyplotNormalize(vmin, vmax)
-        self._scatter.set_norm(self._norm)
-        self._scatter.update_scalarmappable()
-
-    @property
-    def cmap(self):
-        """
-        The colormap of the scatter points
-        """
-        return self._cmap
-
-    @cmap.setter
-    def cmap(self, value):
-        # a cm object
-        if not isinstance(value, str):
-            if hasattr(value, 'name'):
-                value = value.name
-            else:
-                print('Not a valid cmap')
-                return
-        self._scatter.set_cmap(value)
-        self._scatter.update_scalarmappable()
-        self._cmap = value
-        if not (self.running and self._mummy_running):
-            self.show()
-
-    def _scale_colors(self):
-        """
-        Does the color scaling
-        """
-        # None means recalculate the bound
-        if not (self._vmin is None or self._vmax is None):
-            return
-        colors = self._scatter.get_array()
-        if (np.size(colors) if colors is not None else 0) == 0:
-            return
-        vmin = colors.min() if self._vmin is None else self._norm.vmin
-        vmax = colors.max() if self._vmax is None else self._norm.vmax
-        self._set_norm(vmin, vmax)
 
     def _get_xydata_minmax(self):
-        res = self._scatter.get_offsets()
+        res = self._plot.get_offsets()
         if (0 if res is None else np.size(res)) == 0:
             return self.get_xylim()
         return np.min(res[:,0]), np.max(res[:,0]), np.min(res[:,1]), np.max(res[:,1])
+
+    def get_data(self):
+        """
+        Returns the color-encoded values of the markers
+        """
+        return self._plot.get_array()
+
+    def set_data(self, value):
+        """
+        Sets the color-encoded values of the markers
+        """
+        self._plot.set_sizes(np.asarray(value)[-self.xnpts:])
 
     def get_xydata(self):
         """
         Returns the (x, y, c, s) data of the scatter points
         """
-        res = self._scatter.get_offsets()
-        sz = self._scatter.get_sizes()
-        cl = self._scatter.get_array()
+        res = self._plot.get_offsets()
+        sz = self._plot.get_sizes()
+        cl = self.get_data()
         return res[:,0], res[:,1], sz, cl
 
     def set_xydata(self, x, y, c=None, s=None):
         """
-        Sets the x, y, c and s data of the points.
+        Sets the x, y, c and s data of the markers.
         Only the last :py:func:`~joystick.graph.Scatter.xnpts`
         data-points will be displayed
         """
@@ -256,11 +192,11 @@ class Scatter(Graph):
             return
         xy = np.asarray([x,y]).T
         if self.xnpts is not None:
-            self._scatter.set_offsets(xy[-self.xnpts:])
+            self._plot.set_offsets(xy[-self.xnpts:])
             if c is not None:
-                self._scatter.set_array(np.asarray(c)[-self.xnpts:])
-                self._scatter.update_scalarmappable()
+                self._plot.set_array(np.asarray(c)[-self.xnpts:])
+                self._update_scalarmappable()
             if s is not None:
-                self._scatter.set_sizes(np.asarray(s)[-self.xnpts:])
+                self.set_data(s)
         else:
-            self._scatter.set_offsets(xy)
+            self._plot.set_offsets(xy)
