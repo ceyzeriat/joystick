@@ -49,6 +49,7 @@ class ColorbarManager(object):
             vmin = vmax - self._minmini
         elif vmax is None:
             vmax = vmin + self._minmini
+        self._norm = matplotlibpyplotNormalize(vmin, vmax)
         return vmin, vmax
     
     def _reset_colorbar(self, **kwargs):

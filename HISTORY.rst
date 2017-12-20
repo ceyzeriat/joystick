@@ -1,4 +1,4 @@
-0.3.5 (2017-12-20)
+0.3.6 (2017-12-21)
 ++++++++++++++++++
 
 - Fix AttributeError on set_facecolor for old version of matplotlib

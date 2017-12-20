@@ -151,7 +151,6 @@ class Image(ColorbarManager, Frame):
             if key not in kwargs.keys():
                 kwargs[key] = v
         self.centerorig = kwargs.get('centerorig')
-        self._reset_colorbar(**kwargs)
         if self.centerorig:
             unitperpx = float(kwargs.get('unitperpx'))
             extent = np.asarray(np.shape(data))*unitperpx*0.5
@@ -162,6 +161,7 @@ class Image(ColorbarManager, Frame):
                                     origin=kwargs.get('origin', 'lower'),
                                     aspect=kwargs.get('aspect', 'auto'),
                                     extent=extent, **core.linekwargs(kwargs))
+        self._reset_colorbar(**kwargs)
         self._everset = True
 
     def reinit(self, **kwargs):
