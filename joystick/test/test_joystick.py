@@ -140,5 +140,7 @@ def test_play():
     t.myscat.vmin = None
     t.myscat.vmax = None
     t.myscat.cmap = 'jet'
+    t.myimg.cmap = 'Reds'
+    t.myimg.vmax = 0.75
     t.stop()
     t.exit()
