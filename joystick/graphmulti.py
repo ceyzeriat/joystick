@@ -119,10 +119,12 @@ class GraphMulti(Graph):
         legend = kwargs.pop('legend')
         self._legend = int(legend) if legend is not False else False
         self.lbls = kwargs.pop('lbls')
+        self._plot = []
         for ith in range(self.nlines):
-            self.ax.plot(0, 0,
+            self._plot.append(
+                self.ax.plot(0, 0,
                          core.get_ith(kwargs.get('fmt'), ith),
-                         **core.linekwargs(kwargs, ith))
+                         **core.linekwargs(kwargs, ith)))
             if self.numbering:
                 self._add_text(ith, 0, 0)
         self._scale_axes(force=True)

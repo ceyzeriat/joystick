@@ -4,13 +4,17 @@
 from sys import argv, exit
 import os, re
 
-if "upl" in argv[1:]:
-    os.system("python setup.py register -r pypi")
-    os.system("python setup.py sdist upload -r pypi")
-    exit()
+
 
 m = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "joystick", "_version.py")).read()
 version = re.findall(r"__version__ *= *\"(.*?)\"", m)[0]
+
+
+if "upl" in argv[1:]:
+    os.system("python setup.py sdist")
+    os.system("twine upload -r pypi ./dist/joystick-{}.tar.gz".format(version))
+    exit()
+
 
 try:
     from setuptools import setup
@@ -19,10 +23,13 @@ except ImportError:
     from distutils.core import setup
     setup
 
+<<<<<<< HEAD
 try:
     desc = open("README.rst").read() + "\n\n" + "Changelog\n" + "---------\n\n" + open("HISTORY.rst").read()
 except:
     desc = ""
+=======
+>>>>>>> 9e835d4c7f1447087177bc91d86a5819d89464f1
 
 setup(
     name = "joystick",
@@ -47,8 +54,7 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Topic :: Documentation :: Sphinx",
+        "Programming Language :: Python"
     ],
 )
 

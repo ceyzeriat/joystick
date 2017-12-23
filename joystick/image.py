@@ -24,23 +24,24 @@
 #
 ###############################################################################
 
+
 from . import core
 tkinter = core.tkinter
 FigureCanvasTkAgg = core.mat.backends.backend_tkagg.FigureCanvasTkAgg
-cm = core.mat.cm
 np = core.np
-time = core.time
 from .frame import Frame
+from .colorbarmanager import ColorbarManager
 
 
 __all__ = ['Image']
 
 
-class Image(Frame):
+class Image(ColorbarManager, Frame):
     def __init__(self, name, freq_up=1, pos=(50, 50), size=(400, 400),
                  screen_relative=False, background="black", foreground='green',
-                 cmap='gist_earth', cm_bounds=(None, None), unitperpx=1.,
+                 cmap='gist_earth', vmin=None, vmax=None, unitperpx=1.,
                  axrect=(0.1, 0.1, 0.9, 0.9), grid=None, centerorig=True,
+                 cm_bounds=(None, None),
                  **kwargs):
         """
         Initialises an image-frame.
@@ -56,9 +57,6 @@ class Image(Frame):
           * screen_relative (bool) [optional]: set to ``True`` to give
             ``pos`` and ``size`` as a % of the screen size, or ``False``
             to give then as pixels
-          * cmap (colormap name) [optional]: the colormap of the image
-          * cm_bounds (tuple of 2 float) [optional]: the (min, max)
-            values of the colormap
           * unitperpx (float) [optional]: unit scaling
           * axrect (list of 4 floats) [optional]: the axes bounds (l,b,w,h)
             as in ``plt.figure.add_axes(rect=(l,b,w,h))``
@@ -66,6 +64,12 @@ class Image(Frame):
             if ``None``
           * centerorig (bool) [optional]: if ``True`` the coordinates origin
             will be placed in the center of the image
+          * cmap (str or colormap): the colormap of the image
+          * vmin (float or None): the value corresponding to the min of
+            the colorbar, or ``None`` for auto-scaling
+          * vmax (float or None): the value corresponding to the max of
+            the colorbar, or ``None`` for auto-scaling
+          * cm_bounds: DEPRECATED
 
         Kwargs:
           * aspect: see ``plt.imshow``, default 'auto'
@@ -83,6 +87,8 @@ class Image(Frame):
         kwargs['screen_relative'] = screen_relative
         kwargs['cmap'] = cmap
         kwargs['cm_bounds'] = cm_bounds
+        kwargs['vmin'] = vmin
+        kwargs['vmax'] = vmax
         kwargs['unitperpx'] = unitperpx
         kwargs['axrect'] = axrect
         kwargs['grid'] = grid
@@ -92,6 +98,7 @@ class Image(Frame):
         super(Image, self).__init__(**self._kwargs)
         # call ya own init
         self._init_base(**self._kwargs)
+        self._preupdate_fcts += ['_scale_colors']
 
     def _init_base(self, **kwargs):
         """
@@ -118,44 +125,19 @@ class Image(Frame):
             self.ax.grid(color=grid, lw=1)
         self.reset_image(data=[[0, 0],[0, 0]], **kwargs)
         self._callmthd(after, **kwargs)
-
-    @property
-    def cmap(self):
-        """
-        The colormap name of the image
-        """
-        return self._cmap.name
-
-    @cmap.setter
-    def cmap(self, value):
-        if isinstance(value, str):
-            if value in cm.datad.keys():
-                self._cmap = cm.get_cmap(value)
-        else:
-            self._cmap = value
-        if self._everset:
-            self._img.set_cmap(self._cmap)
     
     @property
     def cm_bounds(self):
         """
-        The (min, max) values of the colormap.
+        DEPRECATED, use `vmin` and `vmax` attribute instead
         """
+        print("DEPRECATED, use `vmin` and `vmax` attribute instead")
         return self._norm.vmin, self._norm.vmax
 
     @cm_bounds.setter
     def cm_bounds(self, value):
-        if self._everset:
-            self._set_norm(cm_bounds=value, data=self.get_data())
-            self._img.set_norm(self._norm)
-        else:
-            self._set_norm(cm_bounds=value)
-
-    def _set_norm(self, cm_bounds, data=None):
-        """
-        Set the plt.Normalize from cm_bounds and optional data
-        """
-        self._norm = core.cm_bounds_to_norm(cm_bounds=cm_bounds, data=data)
+        print("DEPRECATED, use `vmin` and `vmax` attribute instead")
+        self._set_norm(vmin=value[0], vmax=vmax[1])
 
     def reset_image(self, data=None, **kwargs):
         """
@@ -167,19 +149,18 @@ class Image(Frame):
         for key, v in self._kwargs.items():
             if key not in kwargs.keys():
                 kwargs[key] = v
-        self.cmap = self._kwargs.get('cmap')
-        self.centerorig = self._kwargs.get('centerorig')
-        self._set_norm(cm_bounds=kwargs.get('cm_bounds'), data=data)
+        self.centerorig = kwargs.get('centerorig')
         if self.centerorig:
             unitperpx = float(kwargs.get('unitperpx'))
             extent = np.asarray(np.shape(data))*unitperpx*0.5
             extent = [-extent[1], extent[1], -extent[0], extent[0]]
         else:
             extent = None
-        self._img = self.ax.imshow(data, cmap=self._cmap, norm=self._norm,
-                                   origin=kwargs.get('origin', 'lower'),
-                                   aspect=kwargs.get('aspect', 'auto'),
-                                   extent=extent, **core.linekwargs(kwargs))
+        self._plot = self.ax.imshow(data, cmap=self._cmap, norm=self._norm,
+                                    origin=kwargs.get('origin', 'lower'),
+                                    aspect=kwargs.get('aspect', 'auto'),
+                                    extent=extent, **core.linekwargs(kwargs))
+        self._reset_colorbar(**kwargs)
         self._everset = True
 
     def reinit(self, **kwargs):
@@ -214,11 +195,11 @@ class Image(Frame):
                 self.reset_image(data=data)
             else:
                 if not np.allclose(old_data, data):
-                    self._img.set_data(data)
+                    self._plot.set_data(data)
 
     def get_data(self):
         """
         Returns the image
         """
         if self.visible and self._everset:
-            return self._img.get_array().data
+            return self._plot.get_array().data

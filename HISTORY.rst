@@ -1,4 +1,13 @@
-0.3.4 (2017-XXXXX)
+0.3.6 (2017-12-21)
+++++++++++++++++++
+
+- Fix AttributeError on set_facecolor for old version of matplotlib
+- Added savefig to graphs, pointing to matplotlib.figure.Figure.savefig
+- Added deprecation warnings
+- Refactored colorbar related code (image and scatter frames)
+
+
+0.3.4 (2017-05-27)
 ++++++++++++++++++
 
 - Deprecation warning matplotlib

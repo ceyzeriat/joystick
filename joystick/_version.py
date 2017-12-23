@@ -26,4 +26,4 @@
 
 
 __version__ = "0.3.7"
-__major__, __minor__, __micro__ = list(map(int, __version__.split('.')))
+

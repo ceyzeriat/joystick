@@ -24,6 +24,7 @@
 #
 ###############################################################################
 
+
 from . import core
 tkinter = core.tkinter
 FigureCanvasTkAgg = core.mat.backends.backend_tkagg.FigureCanvasTkAgg
@@ -110,7 +111,8 @@ class Graph(Frame):
         before, after = self._extract_callit('init')
         self._callmthd(before, **kwargs)
         self._init_basic_graph(**kwargs)
-        self.ax.plot(0, 0, kwargs.pop('fmt'), **core.linekwargs(kwargs))
+        self._plot, = self.ax.plot(0, 0, kwargs.pop('fmt'),
+                                  **core.linekwargs(kwargs))
         self._scale_axes(force=True)
         self._callmthd(after, **kwargs)
 
@@ -132,13 +134,22 @@ class Graph(Frame):
         self._canvas._tkcanvas.pack(side=tkinter.TOP,
                                     fill=tkinter.BOTH,
                                     expand=True)
-        self.ax.set_facecolor(kwargs.pop('bgcol'))
+        bgcol = kwargs.pop('bgcol')
+        try:  # for matplotlib >2.0
+            self.ax.set_facecolor(bgcol)
+        except AttributeError:  # for matplotlib <1.5
+            self.ax.set_axis_bgcolor(bgcol)
         grid = kwargs.pop('grid')
         if grid not in [None, False]:
             self.ax.grid(color=grid, lw=1)
 
-    def add_datapoint(self, data1, data2):
-        return jk.core.add_datapoint(data1, data2, xnptsmax=self.xnptsmax)
+    def add_datapoint(self, data=None, new_data=None, data1=None, data2=None):
+        if data is None and data1 is not None and new_data is None\
+                and data2 is not None:
+            print("DEPRECATION: use data and new_data keyword instead of "\
+                  "data1 and data2")
+            data, new_data = data1, data2
+        return core.add_datapoint(data, new_data, xnptsmax=self.xnptsmax)
 
     def reinit(self, **kwargs):
         """
@@ -207,24 +218,28 @@ class Graph(Frame):
         """
         if self.visible:
             if self.xnpts is not None:
-                self.ax.lines[0].set_xdata(x[-self.xnpts:])
-                self.ax.lines[0].set_ydata(y[-self.xnpts:])
+                self._plot.set_xdata(x[-self.xnpts:])
+                self._plot.set_ydata(y[-self.xnpts:])
             else:
-                self.ax.lines[0].set_xdata(x)
-                self.ax.lines[0].set_ydata(y)
+                self._plot.set_xdata(x)
+                self._plot.set_ydata(y)
 
     def get_xydata(self):
         """
         Returns the x and y data of the graph
         """
         if self.visible:
-            return self.ax.lines[0].get_xdata(), self.ax.lines[0].get_ydata()
+            return self._plot.get_xdata(), self._plot.get_ydata()
 
     def _get_xydata_minmax(self):
-        x, y = self.get_xydata()
-        # if no data on the graph, just return the current xylim
+        ret = self.get_xydata()
+        # graph not visible
+        if ret is None:
+            return
+        x, y = ret
+        # if no data on the graph, just return None
         if (0 if x is None else x.size) == 0 or (0 if y is None else y.size) == 0:
-            return self.get_xylim_graph()
+            return None
         return np.min(x), np.max(x), np.min(y), np.max(y)
 
     @property
@@ -246,6 +261,9 @@ class Graph(Frame):
 
     @xylim.setter
     def xylim(self, value):
+        """
+        The (xmin, xmax, ymin, ymax) limits of the graph
+        """
         if len(value) != 4:
             print("Wrong size for xylim, should be 4")
         else:
@@ -257,8 +275,9 @@ class Graph(Frame):
 
     def set_xylim(self, xylim=(None, None, None, None)):
         """
-        DEPRECATED, set `xylim` property instead
+        DEPRECATED, use `xylim = (.., .., .., ..)` instead
         """
+        print("DEPRECATED, use `xylim = (.., .., .., ..)` instead")
         self._set_xylim(xylim=xylim)
 
     def _set_xylim(self, xylim=(None, None, None, None)):
@@ -280,13 +299,15 @@ class Graph(Frame):
 
     def get_xylim(self):
         """
-        DEPRECATED, use `get_xylim_graph` method instead
+        DEPRECATED, use `get_xylim_graph()` method instead
         """
+        print("DEPRECATED, use `get_xylim_graph()` method instead")
         return self.get_xylim_graph()
 
     def get_xylim_graph(self):
         """
-        Returns the (xmin, xmax, ymin, ymax) limits of the graph
+        Returns the (xmin, xmax, ymin, ymax) limits of the actual
+        graph object as of the time of call
         """
         if self.visible:
             return self.ax.get_xlim() + self.ax.get_ylim()
@@ -300,7 +321,11 @@ class Graph(Frame):
         if not (xmin is None or xmax is None
                 or ymin is None or ymax is None or force):
             return
-        xmin_f, xmax_f, ymin_f, ymax_f = self._get_xydata_minmax()
+        ret = self._get_xydata_minmax()
+        # no data on graph, no need to update the axes
+        if ret is None:
+            return
+        xmin_f, xmax_f, ymin_f, ymax_f = ret
         xmin_f = xmin_f if xmin is None else xmin
         xmax_f = max(xmax_f, xmin_f+self._minmini) if xmax is None else xmax
         ymin_f = ymin_f if ymin is None else ymin
@@ -318,3 +343,11 @@ class Graph(Frame):
             if ymax is None:
                 ymax_f += dy
         self._set_xylim((xmin_f, xmax_f, ymin_f, ymax_f))
+
+    def savefig(fname, *args, **kwargs):
+        """
+        Saves the current figure to file
+
+        See matplotlib.figure.Figure.savefig for details
+        """
+        return self._fig.savefig(fname, *args, **kwargs)

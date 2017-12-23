@@ -47,9 +47,7 @@ def _generate_fake_data_base(self):
                                     time.time(),
                                     xnptsmax=self.mygraph.xnptsmax)
     # concatenate data on the fake data y-axis
-    self.ydata1 = core.add_datapoint(self.ydata1,
-                                     np.random.random()*1.05,
-                                     xnptsmax=self.mygraph.xnptsmax)
+    self.ydata1 = self.mygraph.add_datapoint(self.ydata1, np.random.random()*1.05)
     # check overflow for the last data point added
     if self.ydata1[-1] > 1:
         # send warning to the text-frame
@@ -84,7 +82,7 @@ def _build_frames_base(self):
     self.myimg = self.add_frame(
                     Image(name="Image", size=(100, 100), pos=(50, 600),
                           axrect=(0,0,1,1), freq_up=3,
-                          cm_bounds = (0, 1)))
+                          vmin=0, vmax=1))
     self.myscat = self.add_frame(
                     Scatter(name="scatter", size=(500, 500), pos=(600, 350),
                                xnpts=15, freq_up=7, bgcol="k", cmap='Reds',
@@ -142,5 +140,7 @@ def test_play():
     t.myscat.vmin = None
     t.myscat.vmax = None
     t.myscat.cmap = 'jet'
+    t.myimg.cmap = 'Reds'
+    t.myimg.vmax = 0.75
     t.stop()
     t.exit()
