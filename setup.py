@@ -23,13 +23,10 @@ except ImportError:
     from distutils.core import setup
     setup
 
-<<<<<<< HEAD
 try:
     desc = open("README.rst").read() + "\n\n" + "Changelog\n" + "---------\n\n" + open("HISTORY.rst").read()
 except:
     desc = ""
-=======
->>>>>>> 9e835d4c7f1447087177bc91d86a5819d89464f1
 
 setup(
     name = "joystick",
