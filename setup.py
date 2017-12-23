@@ -19,6 +19,11 @@ except ImportError:
     from distutils.core import setup
     setup
 
+try:
+    desc = open("README.rst").read() + "\n\n" + "Changelog\n" + "---------\n\n" + open("HISTORY.rst").read()
+except:
+    desc = ""
+
 setup(
     name = "joystick",
     version = version,
@@ -28,10 +33,7 @@ setup(
     url = "https://github.com/ceyzeriat/joystick/",
     license = "GNU General Public License v3 or later (GPLv3+)",
     description = "Real-time plotting and logging while console controlling",
-    long_description = open("README.rst").read() + "\n\n"
-                    + "Changelog\n"
-                    + "---------\n\n"
-                    + open("HISTORY.rst").read(),
+    long_description = desc,
     package_data = {"": ["LICENSE", "AUTHORS.rst", "HISTORY.rst", "README.rst"]},
     include_package_data = True,
     install_requires = [],
