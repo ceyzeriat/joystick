@@ -159,6 +159,8 @@ class Image(ColorbarManager, Frame):
         self._plot = self.ax.imshow(data, cmap=self._cmap, norm=self._norm,
                                     origin=kwargs.get('origin', 'lower'),
                                     aspect=kwargs.get('aspect', 'auto'),
+                                    interpolation=kwargs.get('interpolation',
+                                                             None),
                                     extent=extent, **core.linekwargs(kwargs))
         self._reset_colorbar(**kwargs)
         self._everset = True
