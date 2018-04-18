@@ -2,6 +2,8 @@
 ++++++++++++++++++
 
 - Added interpolation to imshow in image frame
+- Chenged to sets for matplotlib arguments lists
+- Replaced old iter property checks by collecions.Iterable
 
 
 0.3.8 (2017-12-23)
