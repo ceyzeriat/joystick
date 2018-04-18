@@ -35,6 +35,7 @@ except ImportError:
     import tkinter
 import time
 import numpy as np
+from collections import Iterable
 
 
 __all__ = ['add_datapoint']
@@ -64,20 +65,20 @@ __doc__ = """Here are some useful constants:
           """
 
 
-LINEKWARGS = [item[4:] \
+LINEKWARGS = set([item[4:] \
                 for item in mat.lines.Line2D.__dict__.keys() \
-                if 'set_' in item] + ['alpha', 'label']
+                if 'set_' in item] + ['alpha', 'label'])
 
 
-TKKWARGS = ['background', 'borderwidth', 'cursor', 'exportselection', 'font',
+TKKWARGS = set(['background', 'borderwidth', 'cursor', 'exportselection', 'font',
             'foreground', 'highlightbackground', 'highlightcolor',
             'highlightthickness', 'insertbackground', 'insertborderwidth',
             'insertofftime', 'insertontime', 'insertwidth', 'padx', 'pady',
             'relief', 'selectbackground', 'selectborderwidth',
             'selectforeground', 'setgrid', 'takefocus', 'xscrollcommand',
-            'yscrollcommand']
+            'yscrollcommand'])
 
-AXKWARGS = ['adjustable', 'agg_filter', 'alpha', 'anchor', 'animated',
+AXKWARGS = set(['adjustable', 'agg_filter', 'alpha', 'anchor', 'animated',
             'aspect', 'autoscale_on', 'autoscalex_on', 'autoscaley_on',
             'axes', 'axes_locator', 'axis_bgcolor', 'axis_off', 'axis_on',
             'axisbelow', 'clip_box', 'clip_on', 'clip_path', 'color_cycle',
@@ -87,11 +88,11 @@ AXKWARGS = ['adjustable', 'agg_filter', 'alpha', 'anchor', 'animated',
             'sketch_params', 'snap', 'title', 'transform', 'url', 'visible',
             'xbound', 'xlabel', 'xlim', 'xmargin', 'xscale', 'xticklabels',
             'xticks', 'ybound', 'ylabel', 'ylim', 'ymargin', 'yscale',
-            'yticklabels', 'yticks', 'zorder']
+            'yticklabels', 'yticks', 'zorder'])
 
-SCATKWARGS = [item[4:] \
+SCATKWARGS = set([item[4:] \
                 for item in mat.collections.Collection.__dict__.keys() \
-                if 'set_' in item] + ['marker', 'verts', 'label']
+                if 'set_' in item] + ['marker', 'verts', 'label'])
 
 def cm_bounds_to_norm(cm_bounds, data=None):
     cmin = float(cm_bounds[0]) if cm_bounds[0] is not None \
@@ -104,8 +105,9 @@ def cm_bounds_to_norm(cm_bounds, data=None):
 def get_ith(v, ith):
     """
     Returns the ith value of v, or v if v is not iterable
+    This will return an error if v is a generator
     """
-    return v[ith] if hasattr(v, '__iter__') else v
+    return v[ith] if isinstance(v, Iterable) else v
 
 
 def colorbar(cmap="jet", cm_bounds=(0, 1)):
@@ -159,6 +161,8 @@ def extract_kwargs(kwargs, ll, ith=None):
     Returns a copy of kwargs that contains only keys found in ll
     """
     dic = {}
+    if not isinstance(ll, set):
+        ll = set(ll)
     for key, v in kwargs.items():
         if key in ll:
             dic[key] = v if ith is None else get_ith(v, ith)
